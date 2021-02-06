@@ -119,35 +119,37 @@ artículo comparando algunas de ellas:
 13. [**Natural Language Processing**](./nlp.ipynb)
 
 <!--
-Cuadernos pendientes:
+Cuadernos listos:
 * agents.ipynb [Tested]
+* csp.ipynb [Tested]
+* games.ipynb [Tested]
+* logic.ipynb [Tested]
+* planning.ipynb [Tested]
+* search.ipynb [Tested]
+* vacuum_world.ipynb [Tested]
+
+Cuadernos pendientes:
 * arc_consitency_heuristics.ipynb
 * classical_planning_approches.ipynb
-* csp.ipynb
-* games.ipynb [Tested]
 * improving_sat_algorithms.ipynb
 * knowledge_current_best.ipynb
 * knowledge_FOIL.ipynb
 * knowledge_version_space.ipynb
 * learning_apps.ipynb
 * learning.ipynb
-* logic.ipynb
 * mdp_apps.ipynb
 * mdp.ipynb
 * neural_nets.ipynb
 * nlp_apps.ipynb
-* nlp_apps.ipynb
+* nlp.ipynb
 * planning_angelic_search.ipynb
 * planning_graphPlan.ipynb
 * planning_hierarchical_serach.ipynb
 * planning_partial_order_planner.ipynb
 * planning_total_order_planner.ipynb
-* planning.ipynb
 * probability.ipynb
 * reinforcement_learning.ipynb
-* search.ipynb [Tested]
 * text.ipynb
-* vacuum_world.ipynb [Tested]
 * viterbi_algorithm.ipynb
 -->
 
