@@ -16,9 +16,11 @@ def DTAgentProgram(belief_state):
     def program(percept):
         belief_state.observe(program.action, percept)
         program.action = max(belief_state.actions(), key=belief_state.expected_outcome_utility)
+
         return program.action
 
     program.action = None
+
     return program
 
 
@@ -41,9 +43,11 @@ class ProbDist:
         self.prob = {}
         self.var_name = var_name
         self.values = []
+
         if freq:
             for (v, p) in freq.items():
                 self[v] = p
+
             self.normalize()
 
     def __getitem__(self, val):
@@ -57,6 +61,7 @@ class ProbDist:
         """Set P(val) = p."""
         if val not in self.values:
             self.values.append(val)
+
         self.prob[val] = p
 
     def normalize(self):
@@ -64,9 +69,11 @@ class ProbDist:
         Returns the normalized distribution.
         Raises a ZeroDivisionError if the sum of the values is 0."""
         total = sum(self.prob.values())
+
         if not np.isclose(total, 1.0):
             for val in self.prob:
                 self.prob[val] /= total
+
         return self
 
     def show_approx(self, numfmt='{:.3g}'):
@@ -103,6 +110,7 @@ class JointProbDist(ProbDist):
         of the values we have seen so far for each variable."""
         values = event_values(values, self.variables)
         self.prob[values] = p
+
         for var, val in zip(self.variables, values):
             if val not in self.vals[var]:
                 self.vals[var].append(val)
@@ -144,8 +152,10 @@ def enumerate_joint_ask(X, e, P):
     assert X not in e, "Query variable must be distinct from evidence"
     Q = ProbDist(X)  # probability distribution for X, initially empty
     Y = [v for v in P.variables if v != X and v not in e]  # hidden variables.
+
     for xi in P.values(X):
         Q[xi] = enumerate_joint(Y, extend(e, X, xi), P)
+
     return Q.normalize()
 
 
@@ -154,7 +164,9 @@ def enumerate_joint(variables, e, P):
     provided variables is P's remaining variables (the ones not in e)."""
     if not variables:
         return P[e]
+
     Y, rest = variables[0], variables[1:]
+
     return sum([enumerate_joint(rest, extend(e, Y, y), P) for y in P.values(Y)])
 
 
@@ -169,6 +181,7 @@ class BayesNet:
         self.nodes = []
         self.variables = []
         node_specs = node_specs or []
+
         for node_spec in node_specs:
             self.add(node_spec)
 
@@ -176,10 +189,13 @@ class BayesNet:
         """Add a node to the net. Its parents must already be in the
         net, and its variable must not."""
         node = BayesNode(*node_spec)
+
         assert node.variable not in self.variables
         assert all((parent in self.variables) for parent in node.parents)
+
         self.nodes.append(node)
         self.variables.append(node.variable)
+
         for parent in node.parents:
             self.variable_node(parent).children.append(node)
 
@@ -187,9 +203,11 @@ class BayesNet:
         """Return the node for the variable named var.
         >>> burglary.variable_node('Burglary').variable
         'Burglary'"""
+
         for n in self.nodes:
             if n.variable == var:
                 return n
+
         raise Exception("No such variable: {}".format(var))
 
     def variable_values(self, var):
@@ -224,6 +242,7 @@ class DecisionNetwork(BayesNet):
         """Compute the expected utility given an action and evidence"""
         u = 0.0
         prob_dist = self.infer(action, evidence, self).prob
+
         for item, _ in prob_dist.items():
             u += prob_dist[item] * self.get_utility(action, item)
 
@@ -275,12 +294,14 @@ class InformationGatheringAgent(Agent):
         v_by_c = []
         for var in variables:
             v_by_c.append(self.vpi(var) / self.cost(var))
+
         return v_by_c
 
     def vpi(self, variable):
         """Return VPI for a given variable"""
         vpi = 0.0
         prob_dist = self.infer(variable, self.observation, self.decnet).prob
+
         for item, _ in prob_dist.items():
             post_prob = prob_dist[item]
             new_observation = list(self.observation)
@@ -289,6 +310,7 @@ class InformationGatheringAgent(Agent):
             vpi += post_prob * expected_utility
 
         vpi -= self.decnet.get_expected_utility(variable, self.observation)
+
         return vpi
 
 
@@ -320,6 +342,7 @@ class BayesNode:
         >>> Z = BayesNode('Z', 'P Q',
         ...    {(T, T): 0.2, (T, F): 0.3, (F, T): 0.5, (F, F): 0.7})
         """
+
         if isinstance(parents, str):
             parents = parents.split()
 
@@ -332,6 +355,7 @@ class BayesNode:
                 cpt = {(v,): p for v, p in cpt.items()}
 
         assert isinstance(cpt, dict)
+
         for vs, p in cpt.items():
             assert isinstance(vs, tuple) and len(vs) == len(parents)
             assert all(isinstance(v, bool) for v in vs)
@@ -350,8 +374,10 @@ class BayesNode:
         >>> bn = BayesNode('X', 'Burglary', {T: 0.2, F: 0.625})
         >>> bn.p(False, {'Burglary': False, 'Earthquake': True})
         0.375"""
+
         assert isinstance(value, bool)
         ptrue = self.cpt[event_values(event, self.parents)]
+
         return ptrue if value else 1 - ptrue
 
     def sample(self, event):
@@ -388,10 +414,14 @@ def enumeration_ask(X, e, bn):
     >>> enumeration_ask('Burglary', dict(JohnCalls=T, MaryCalls=T), burglary
     ...  ).show_approx()
     'False: 0.716, True: 0.284'"""
+
     assert X not in e, "Query variable must be distinct from evidence"
+
     Q = ProbDist(X)
+
     for xi in bn.variable_values(X):
         Q[xi] = enumerate_all(bn.variables, extend(e, X, xi), bn)
+
     return Q.normalize()
 
 
@@ -402,8 +432,10 @@ def enumerate_all(variables, e, bn):
     (the ones other than variables). Parents must precede children in variables."""
     if not variables:
         return 1.0
+
     Y, rest = variables[0], variables[1:]
     Ynode = bn.variable_node(Y)
+
     if Y in e:
         return Ynode.p(e[Y], e) * enumerate_all(rest, e, bn)
     else:
@@ -420,13 +452,19 @@ def elimination_ask(X, e, bn):
     Compute bn's P(X|e) by variable elimination.
     >>> elimination_ask('Burglary', dict(JohnCalls=T, MaryCalls=T), burglary
     ...  ).show_approx()
-    'False: 0.716, True: 0.284'"""
+    'False: 0.716, True: 0.284'
+    """
+
     assert X not in e, "Query variable must be distinct from evidence"
+
     factors = []
+
     for var in reversed(bn.variables):
         factors.append(make_factor(var, e, bn))
+
         if is_hidden(var, X, e):
             factors = sum_out(var, factors, bn)
+
     return pointwise_product(factors, bn).normalize()
 
 
@@ -443,6 +481,7 @@ def make_factor(var, e, bn):
     variables = [X for X in [var] + node.parents if X not in e]
     cpt = {event_values(e1, variables): node.p(e1[var], e1)
            for e1 in all_events(variables, bn, e)}
+
     return Factor(variables, cpt)
 
 
@@ -453,9 +492,12 @@ def pointwise_product(factors, bn):
 def sum_out(var, factors, bn):
     """Eliminate var from all factors by summing over its values."""
     result, var_factors = [], []
+
     for f in factors:
         (var_factors if var in f.variables else result).append(f)
+
     result.append(pointwise_product(var_factors, bn).sum_out(var, bn))
+
     return result
 
 
@@ -470,6 +512,7 @@ class Factor:
         """Multiply two factors, combining their variables."""
         variables = list(set(self.variables) | set(other.variables))
         cpt = {event_values(e, variables): self.p(e) * other.p(e) for e in all_events(variables, bn, {})}
+
         return Factor(variables, cpt)
 
     def sum_out(self, var, bn):
@@ -477,11 +520,13 @@ class Factor:
         variables = [X for X in self.variables if X != var]
         cpt = {event_values(e, variables): sum(self.p(extend(e, var, val)) for val in bn.variable_values(var))
                for e in all_events(variables, bn, {})}
+
         return Factor(variables, cpt)
 
     def normalize(self):
         """Return my probabilities; must be down to one variable."""
         assert len(self.variables) == 1
+
         return ProbDist(self.variables[0], {k: v for ((k,), v) in self.cpt.items()})
 
     def p(self, e):
@@ -495,6 +540,7 @@ def all_events(variables, bn, e):
         yield e
     else:
         X, rest = variables[0], variables[1:]
+
         for e1 in all_events(rest, bn, e):
             for x in bn.variable_values(X):
                 yield extend(e1, X, x)
@@ -522,8 +568,10 @@ def prior_sample(bn):
     The result is a {variable: value} dict.
     """
     event = {}
+
     for node in bn.nodes:
         event[node.variable] = node.sample(event)
+
     return event
 
 
@@ -542,11 +590,15 @@ def rejection_sampling(X, e, bn, N=10000):
     ...   burglary, 10000).show_approx()
     'False: 0.7, True: 0.3'
     """
+
     counts = {x: 0 for x in bn.variable_values(X)}  # bold N in [Figure 14.14]
+
     for j in range(N):
         sample = prior_sample(bn)  # boldface x in [Figure 14.14]
+
         if consistent_with(sample, e):
             counts[sample[X]] += 1
+
     return ProbDist(X, counts)
 
 
@@ -568,10 +620,13 @@ def likelihood_weighting(X, e, bn, N=10000):
     ...   burglary, 10000).show_approx()
     'False: 0.702, True: 0.298'
     """
+
     W = {x: 0 for x in bn.variable_values(X)}
+
     for j in range(N):
         sample, weight = weighted_sample(bn, e)  # boldface x, w in [Figure 14.15]
         W[sample[X]] += weight
+
     return ProbDist(X, W)
 
 
@@ -583,12 +638,15 @@ def weighted_sample(bn, e):
     """
     w = 1
     event = dict(e)  # boldface x in [Figure 14.15]
+
     for node in bn.nodes:
         Xi = node.variable
+
         if Xi in e:
             w *= node.p(e[Xi], event)
         else:
             event[Xi] = node.sample(event)
+
     return event, w
 
 
@@ -598,15 +656,19 @@ def weighted_sample(bn, e):
 def gibbs_ask(X, e, bn, N=1000):
     """[Figure 14.16]"""
     assert X not in e, "Query variable must be distinct from evidence"
+
     counts = {x: 0 for x in bn.variable_values(X)}  # bold N in [Figure 14.16]
     Z = [var for var in bn.variables if var not in e]
     state = dict(e)  # boldface x in [Figure 14.16]
+
     for Zi in Z:
         state[Zi] = random.choice(bn.variable_values(Zi))
+
     for j in range(N):
         for Zi in Z:
             state[Zi] = markov_blanket_sample(Zi, state, bn)
             counts[state[X]] += 1
+
     return ProbDist(X, counts)
 
 
@@ -617,10 +679,12 @@ def markov_blanket_sample(X, e, bn):
     X's parents, children, and children's parents."""
     Xnode = bn.variable_node(X)
     Q = ProbDist(X)
+
     for xi in bn.variable_values(X):
         ei = extend(e, X, xi)
         # [Equation 14.12]
         Q[xi] = Xnode.p(xi, e) * product(Yj.p(ei[Yj.variable], ei) for Yj in Xnode.children)
+
     # (assuming a Boolean variable here)
     return probability(Q.normalize()[True])
 
@@ -659,7 +723,7 @@ def backward(HMM, b, ev):
                                 scalar_vector_product(prediction[1], HMM.transition_model[1])))
 
 
-def forward_backward(HMM, ev):
+def forward_backward(HMM, ev, prior=None):
     """
     [Figure 15.4]
     Forward-Backward algorithm for smoothing. Computes posterior probabilities
@@ -672,10 +736,11 @@ def forward_backward(HMM, ev):
     b = [1.0, 1.0]
     sv = [[0, 0] for _ in range(len(ev))]
 
-    fv[0] = HMM.prior
+    fv[0] = prior if prior else HMM.prior
 
     for i in range(1, t + 1):
         fv[i] = forward(HMM, fv[i - 1], ev[i])
+
     for i in range(t, -1, -1):
         sv[i - 1] = normalize(element_wise_product(fv[i], b))
         b = backward(HMM, b, ev[i])
@@ -721,6 +786,7 @@ def viterbi(HMM, ev):
     for i in range(t - 1, -1, -1):
         ml_probabilities[i] = m[i][i_max]
         ml_path[i] = True if i_max == 0 else False
+
         if i > 0:
             i_max = backtracking_graph[i - 1][i_max]
 
@@ -744,12 +810,14 @@ def fixed_lag_smoothing(e_t, HMM, d, ev, t):
     B = [[1, 0], [0, 1]]
 
     O_t = np.diag(HMM.sensor_dist(e_t))
+
     if t > d:
         f = forward(HMM, f, e_t)
         O_tmd = np.diag(HMM.sensor_dist(ev[t - d]))
         B = matrix_multiplication(np.linalg.inv(O_tmd), np.linalg.inv(T_model), B, T_model, O_t)
     else:
         B = matrix_multiplication(B, T_model, O_t)
+
     t += 1
 
     if t > d:
@@ -774,14 +842,17 @@ def particle_filtering(e, N, HMM):
     # Assign state according to probability
     s = ['A' if probability(dist[0]) else 'B' for _ in range(N)]
     w_tot = 0
+
     # Calculate importance weight given evidence e
     for i in range(N):
         if s[i] == 'A':
             # P(U|A)*P(A)
             w_i = HMM.sensor_dist(e)[0] * dist[0]
+
         if s[i] == 'B':
             # P(U|B)*P(B)
             w_i = HMM.sensor_dist(e)[1] * dist[1]
+
         w[i] = w_i
         w_tot += w_i
 
@@ -820,6 +891,7 @@ class MCLmap:
         # 0N 1E 2S 3W
         orient = random.choice(range(4))
         kin_state = pos + (orient,)
+
         return kin_state
 
     def ray_cast(self, sensor_num, kin_state):
@@ -831,13 +903,17 @@ class MCLmap:
         # 3R1
         #  2
         delta = ((sensor_num % 2 == 0) * (sensor_num - 1), (sensor_num % 2 == 1) * (2 - sensor_num))
+
         # sensor direction changes based on orientation
         for _ in range(orient):
             delta = (delta[1], -delta[0])
+
         range_count = 0
+
         while 0 <= pos[0] < self.nrows and 0 <= pos[1] < self.nrows and not self.m[pos[0]][pos[1]]:
             pos = vector_add(pos, delta)
             range_count += 1
+
         return range_count
 
 
@@ -862,9 +938,11 @@ def monte_carlo_localization(a, z, N, P_motion_sample, P_sensor, m, S=None):
     for i in range(N):
         S_[i] = P_motion_sample(S[i], v, w)
         W_[i] = 1
+
         for j in range(M):
             z_ = ray_cast(j, S_[i], m)
             W_[i] = W_[i] * P_sensor(z[j], z_)
 
     S = weighted_sample_with_replacement(N, S_, W_)
+
     return S

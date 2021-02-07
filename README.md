@@ -71,7 +71,7 @@ paso 3 en adelante.
 Studio Community 2015 o superior (se recomienda esta última), con las
 herramientas de Compilación de C++. Si no se quiere instalar esto, se debe ir
 a la página oficial de Microsoft y descargar todas las herramientas de
-compilación por a parte, esto se puede hacer [aquí][vs-build-tools].
+compilación por aparte, esto se puede hacer [aquí][vs-build-tools].
 
 ![build-tools][build-tools-img]
 
@@ -103,20 +103,23 @@ artículo comparando algunas de ellas:
 [`Six easy ways to run your Jupyter Notebook in the cloud`][cloud-services-for-jupyter-notebook].
 
 
-### **Índice de los algoritmos por capítulos**
-1. [**Agents**](./agents.ipynb)
-2. [**Vacuum World**](./vacuum_world.ipynb)
-3. [**Search**](./search.ipynb)
-4. [**Games**](./games.ipynb)
-5. [**Constraint Satisfaction Problems**](./csp.ipynb)
-6. [**Logic**](./logic.ipynb)
-7. [**Planning**](./planning.ipynb)
-8. [**Probability**](./probability.ipynb)
-9.  [**Markov Decision Processes**](./mdp.ipynb)
-10. [**Learning**](./learning.ipynb)
-11. [**Reinforcement Learning**](./rl.ipynb)
-12. [**Statistical Language Processing Tools**](./text.ipynb)
-13. [**Natural Language Processing**](./nlp.ipynb)
+## **Índice de los algoritmos por capítulos**
+1.  [**Agents: agents.ipynb**](./agents.ipynb)
+2.  [**Vacuum World: vacuum_world.ipynb**](./vacuum_world.ipynb)
+3.  [**Search: search.ipynb**](./search.ipynb)
+4.  [**Games: games.ipynb**](./games.ipynb)
+5.  [**Constraint Satisfaction Problems: csp.ipynb**](./csp.ipynb)
+6.  [**Logic: logic.ipynb**](./logic.ipynb)
+7.  [**Planning: planning.ipynb**](./planning.ipynb)
+8.  [**Probability: probability.ipynb**](./probability.ipynb)
+9.  [**Markov Decision Processes: mdp.ipynb**](./mdp.ipynb)
+9.  [**Markov Decision Processes Applications: mdp_apps.ipynb**](./mdp_apps.ipynb)
+10. [**Learning: learning.ipynb**](./learning.ipynb)
+10. [**Learning Applications: learning_app.ipynb**](./learning_apps.ipynb)
+11. [**Reinforcement Learning: rl.ipynb**](./rl.ipynb)
+12. [**Statistical Language Processing Tools: text.ipynb**](./text.ipynb)
+13. [**Natural Language Processing: nlp.ipynb**](./nlp.ipynb)
+13. [**Natural Language Processing Applications: nlp_apps.ipynb**](./nlp_apps.ipynb)
 
 <!--
 Cuadernos listos:
@@ -125,8 +128,11 @@ Cuadernos listos:
 * games.ipynb [Tested]
 * logic.ipynb [Tested]
 * planning.ipynb [Tested]
+* probability.ipynb [Tested]
 * search.ipynb [Tested]
 * vacuum_world.ipynb [Tested]
+* mdp.ipynb [Tested]
+* mdp_apps.ipynb
 
 Cuadernos pendientes:
 * arc_consitency_heuristics.ipynb
@@ -137,8 +143,6 @@ Cuadernos pendientes:
 * knowledge_version_space.ipynb
 * learning_apps.ipynb
 * learning.ipynb
-* mdp_apps.ipynb
-* mdp.ipynb
 * neural_nets.ipynb
 * nlp_apps.ipynb
 * nlp.ipynb
@@ -147,7 +151,6 @@ Cuadernos pendientes:
 * planning_hierarchical_serach.ipynb
 * planning_partial_order_planner.ipynb
 * planning_total_order_planner.ipynb
-* probability.ipynb
 * reinforcement_learning.ipynb
 * text.ipynb
 * viterbi_algorithm.ipynb

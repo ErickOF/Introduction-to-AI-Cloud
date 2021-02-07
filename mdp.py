@@ -44,6 +44,7 @@ class MDP:
 
         self.terminals = terminals
         self.transitions = transitions or {}
+
         if not self.transitions:
             print("Warning: Transition table is empty.")
 
@@ -83,6 +84,7 @@ class MDP:
             s2 = set(tr[1] for actions in transitions.values()
                      for effects in actions.values()
                      for tr in effects)
+
             return s1.union(s2)
         else:
             print('Could not retrieve states from transitions')
@@ -106,8 +108,10 @@ class MDP:
         for s1, actions in self.transitions.items():
             for a in actions.keys():
                 s = 0
+
                 for o in actions[a]:
                     s += o[0]
+
                 assert abs(s - 1) < 0.001
 
 
@@ -136,19 +140,24 @@ class GridMDP(MDP):
         grid.reverse()  # because we want row 0 on bottom, not on top
         reward = {}
         states = set()
+
         self.rows = len(grid)
         self.cols = len(grid[0])
         self.grid = grid
+
         for x in range(self.cols):
             for y in range(self.rows):
                 if grid[y][x]:
                     states.add((x, y))
                     reward[(x, y)] = grid[y][x]
+
         self.states = states
         actlist = orientations
         transitions = {}
+
         for s in states:
             transitions[s] = {}
+
             for a in actlist:
                 transitions[s][a] = self.calculate_T(s, a)
         MDP.__init__(self, init, actlist=actlist,
@@ -205,13 +214,16 @@ def value_iteration(mdp, epsilon=0.001):
 
     U1 = {s: 0 for s in mdp.states}
     R, T, gamma = mdp.R, mdp.T, mdp.gamma
+
     while True:
         U = U1.copy()
         delta = 0
+
         for s in mdp.states:
             U1[s] = R(s) + gamma * max(sum(p * U[s1] for (p, s1) in T(s, a))
                                        for a in mdp.actions(s))
             delta = max(delta, abs(U1[s] - U[s]))
+
         if delta <= epsilon * (1 - gamma) / gamma:
             return U
 
