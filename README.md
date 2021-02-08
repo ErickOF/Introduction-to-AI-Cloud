@@ -126,13 +126,15 @@ Cuadernos listos:
 * agents.ipynb [Tested]
 * csp.ipynb [Tested]
 * games.ipynb [Tested]
+* learning.ipynb **
+* learning_apps.ipynb
 * logic.ipynb [Tested]
+* mdp.ipynb [Tested]
+* mdp_apps.ipynb [Tested]
 * planning.ipynb [Tested]
 * probability.ipynb [Tested]
 * search.ipynb [Tested]
 * vacuum_world.ipynb [Tested]
-* mdp.ipynb [Tested]
-* mdp_apps.ipynb
 
 Cuadernos pendientes:
 * arc_consitency_heuristics.ipynb
@@ -141,8 +143,6 @@ Cuadernos pendientes:
 * knowledge_current_best.ipynb
 * knowledge_FOIL.ipynb
 * knowledge_version_space.ipynb
-* learning_apps.ipynb
-* learning.ipynb
 * neural_nets.ipynb
 * nlp_apps.ipynb
 * nlp.ipynb
