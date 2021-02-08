@@ -15,6 +15,11 @@ pytest-cov
 qpsolvers
 scipy
 sortedcontainers
-tensorflow
+tensorflow>=2.2
+h5py~=2.10.0
+numpy==1.19.2
+six~=1.15.0
 graphviz
 pydot
+setuptools
+qpsolvers

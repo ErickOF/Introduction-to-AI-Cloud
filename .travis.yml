@@ -8,7 +8,7 @@ python:
 
 install:
   - pip install --upgrade -r requirements.txt
-  - sudo apt-get install graphviz
+  - apt-get install --yes --no-install-recommends
 
 script:
   - py.test --cov=./
