@@ -71,6 +71,7 @@ class DataSet:
             self.attr_names = attr_names.split()
         else:
             self.attr_names = attr_names or attrs
+
         self.set_problem(target, inputs=inputs, exclude=exclude)
 
     def set_problem(self, target, inputs=None, exclude=()):
@@ -83,12 +84,15 @@ class DataSet:
         """
         self.target = self.attr_num(target)
         exclude = list(map(self.attr_num, exclude))
+
         if inputs:
             self.inputs = remove_all(self.target, inputs)
         else:
             self.inputs = [a for a in self.attrs if a != self.target and a not in exclude]
+
         if not self.values:
             self.update_values()
+
         self.check_me()
 
     def check_me(self):
@@ -97,6 +101,7 @@ class DataSet:
         assert self.target in self.attrs
         assert self.target not in self.inputs
         assert set(self.inputs).issubset(set(self.attrs))
+
         if self.got_values_flag:
             # only check if values are provided while initializing DataSet
             list(map(self.check_example, self.examples))
@@ -135,6 +140,7 @@ class DataSet:
         if not classes:
             # if classes were not given, extract them from values
             classes = sorted(self.values[self.target])
+
         for item in self.examples:
             item[self.target] = classes.index(item[self.target])
 
@@ -173,6 +179,7 @@ class DataSet:
         for t in target_names:
             # find all the item feature values for item in class t
             features = [[] for _ in range(feature_numbers)]
+
             for item in item_buckets[t]:
                 for i in range(feature_numbers):
                     features[i].append(item[i])
@@ -198,6 +205,7 @@ def parse_csv(input, delim=','):
     [[1, 2, 3], [0, 2, 'na']]
     """
     lines = [line for line in input.splitlines() if line.strip()]
+
     return [list(map(num_or_str, line.split(delim))) for line in lines]
 
 
@@ -207,14 +215,19 @@ def err_ratio(predict, dataset, examples=None):
     verbose - 0: No output; 1: Output wrong; 2 (or greater): Output correct
     """
     examples = examples or dataset.examples
+
     if len(examples) == 0:
         return 0.0
+
     right = 0
+
     for example in examples:
         desired = example[dataset.target]
         output = predict(dataset.sanitize(example))
+
         if output == desired:
             right += 1
+
     return 1 - (right / len(examples))
 
 
@@ -236,6 +249,7 @@ def train_test_split(dataset, start=None, end=None, test_split=None):
     training set.
     """
     examples = dataset.examples
+
     if test_split is None:
         train = examples[:start] + examples[end:]
         val = examples[start:end]
@@ -258,19 +272,23 @@ def cross_validation_wrapper(learner, dataset, k=10, trials=1):
     """
     errs = []
     size = 1
+
     while True:
         errT, errV = cross_validation(learner, dataset, size, k, trials)
+
         # check for convergence provided err_val is not empty
         if errT and not np.isclose(errT[-1], errT, rtol=1e-6):
             best_size = 0
             min_val = np.inf
             i = 0
+
             while i < size:
                 if errs[i] < min_val:
                     min_val = errs[i]
                     best_size = i
                 i += 1
             return learner(dataset, best_size)
+
         errs.append(errV)
         size += 1
 
@@ -283,13 +301,16 @@ def cross_validation(learner, dataset, size=None, k=10, trials=1):
     Returns Training error, Validation error
     """
     k = k or len(dataset.examples)
+
     if trials > 1:
         trial_errT = 0
         trial_errV = 0
+
         for t in range(trials):
             errT, errV = cross_validation(learner, dataset, size, k, trials)
             trial_errT += errT
             trial_errV += errV
+
         return trial_errT / trials, trial_errV / trials
     else:
         fold_errT = 0
@@ -297,6 +318,7 @@ def cross_validation(learner, dataset, size=None, k=10, trials=1):
         n = len(dataset.examples)
         examples = dataset.examples
         random.shuffle(dataset.examples)
+
         for fold in range(k):
             train_data, val_data = train_test_split(dataset, fold * (n // k), (fold + 1) * (n // k))
             dataset.examples = train_data
@@ -305,6 +327,7 @@ def cross_validation(learner, dataset, size=None, k=10, trials=1):
             fold_errV += err_ratio(h, dataset, val_data)
             # reverting back to original once test is completed
             dataset.examples = examples
+
         return fold_errT / k, fold_errV / k
 
 
@@ -319,6 +342,7 @@ def learning_curve(learner, dataset, trials=10, sizes=None):
 
     def score(learner, size):
         random.shuffle(dataset.examples)
+
         return cross_validation(learner, dataset, size, trials)
 
     return [(size, mean([score(learner, size) for _ in range(trials)])) for size in sizes]
@@ -354,6 +378,7 @@ class DecisionFork:
     def __call__(self, example):
         """Given an example, classify it using the attribute and the branches."""
         attr_val = example[self.attr]
+
         if attr_val in self.branches:
             return self.branches[attr_val](example)
         else:
@@ -367,6 +392,7 @@ class DecisionFork:
     def display(self, indent=0):
         name = self.attr_name
         print('Test', name)
+
         for (val, subtree) in self.branches.items():
             print(' ' * 4 * indent, name, '=', val, '==>', end=' ')
             subtree.display(indent + 1)
@@ -399,15 +425,20 @@ def DecisionTreeLearner(dataset):
     def decision_tree_learning(examples, attrs, parent_examples=()):
         if len(examples) == 0:
             return plurality_value(parent_examples)
+
         if all_same_class(examples):
             return DecisionLeaf(examples[0][target])
+
         if len(attrs) == 0:
             return plurality_value(examples)
+
         A = choose_attribute(attrs, examples)
         tree = DecisionFork(A, dataset.attr_names[A], plurality_value(examples))
+
         for (v_k, exs) in split_by(A, examples):
             subtree = decision_tree_learning(exs, remove_all(A, attrs), examples)
             tree.add(v_k, subtree)
+
         return tree
 
     def plurality_value(examples):
@@ -416,6 +447,7 @@ def DecisionTreeLearner(dataset):
         (If target is binary, this is the majority; otherwise plurality).
         """
         popular = argmax_random_tie(values[target], key=lambda v: count(target, v, examples))
+
         return DecisionLeaf(popular)
 
     def count(attr, val, examples):
@@ -425,6 +457,7 @@ def DecisionTreeLearner(dataset):
     def all_same_class(examples):
         """Are all these examples in the same target class?"""
         class0 = examples[0][target]
+
         return all(e[target] == class0 for e in examples)
 
     def choose_attribute(attrs, examples):
@@ -438,7 +471,9 @@ def DecisionTreeLearner(dataset):
             return information_content([count(target, v, examples) for v in values[target]])
 
         n = len(examples)
-        remainder = sum((len(examples_i) / n) * I(examples_i) for (v, examples_i) in split_by(attr, examples))
+        remainder = sum((len(examples_i) / n) * I(examples_i)
+                        for (v, examples_i) in split_by(attr, examples))
+
         return I(examples) - remainder
 
     def split_by(attr, examples):
@@ -451,6 +486,7 @@ def DecisionTreeLearner(dataset):
 def information_content(values):
     """Number of bits to represent the probability distribution in values."""
     probabilities = normalize(remove_all(0, values))
+
     return sum(-p * np.log2(p) for p in probabilities)
 
 
@@ -463,9 +499,12 @@ def DecisionListLearner(dataset):
     def decision_list_learning(examples):
         if not examples:
             return [(True, False)]
+
         t, o, examples_t = find_examples(examples)
+
         if not t:
             raise Exception
+
         return [(t, o)] + decision_list_learning(examples - examples_t)
 
     def find_examples(examples):
@@ -496,6 +535,7 @@ def NearestNeighborLearner(dataset, k=1):
     def predict(example):
         """Find the k closest items, and have them vote for the best."""
         best = heapq.nsmallest(k, ((dataset.distance(e, example), e) for e in dataset.examples))
+
         return mode(e[dataset.target] for (d, e) in best)
 
     return predict
@@ -508,15 +548,8 @@ def LinearLearner(dataset, learning_rate=0.01, epochs=100):
     """
     idx_i = dataset.inputs
     idx_t = dataset.target
-    examples = dataset.examples
+    examples = np.array([np.array(example) for example in dataset.examples])
     num_examples = len(examples)
-
-    # X transpose
-    X_col = [dataset.values[i] for i in idx_i]  # vertical columns of X
-
-    # add dummy
-    ones = [1 for _ in range(len(examples))]
-    X_col = [ones] + X_col
 
     # initialize random weights
     num_weights = len(idx_i) + 1
@@ -524,16 +557,17 @@ def LinearLearner(dataset, learning_rate=0.01, epochs=100):
 
     for epoch in range(epochs):
         err = []
+
         # pass over all examples
         for example in examples:
-            x = [1] + example
+            x = np.concatenate(([1], example[:idx_t]))
             y = np.dot(w, x)
             t = example[idx_t]
             err.append(t - y)
 
         # update weights
         for i in range(len(w)):
-            w[i] = w[i] + learning_rate * (np.dot(err, X_col[i]) / num_examples)
+            w[i] = w[i] + learning_rate * (np.dot(err, examples[:, i]) / num_examples)
 
     def predict(example):
         x = [1] + example
@@ -549,15 +583,8 @@ def LogisticLinearLeaner(dataset, learning_rate=0.01, epochs=100):
     """
     idx_i = dataset.inputs
     idx_t = dataset.target
-    examples = dataset.examples
+    examples = np.array([np.array(example) for example in dataset.examples])
     num_examples = len(examples)
-
-    # X transpose
-    X_col = [dataset.values[i] for i in idx_i]  # vertical columns of X
-
-    # add dummy
-    ones = [1 for _ in range(len(examples))]
-    X_col = [ones] + X_col
 
     # initialize random weights
     num_weights = len(idx_i) + 1
@@ -566,9 +593,10 @@ def LogisticLinearLeaner(dataset, learning_rate=0.01, epochs=100):
     for epoch in range(epochs):
         err = []
         h = []
+
         # pass over all examples
         for example in examples:
-            x = [1] + example
+            x = np.concatenate(([1], example[:idx_t]))
             y = sigmoid(np.dot(w, x))
             h.append(sigmoid_derivative(y))
             t = example[idx_t]
@@ -577,7 +605,7 @@ def LogisticLinearLeaner(dataset, learning_rate=0.01, epochs=100):
         # update weights
         for i in range(len(w)):
             buffer = [x * y for x, y in zip(err, h)]
-            w[i] = w[i] + learning_rate * (np.dot(buffer, X_col[i]) / num_examples)
+            w[i] = w[i] + learning_rate * (np.dot(buffer, examples[:, i]) / num_examples)
 
     def predict(example):
         x = [1] + example
@@ -621,6 +649,7 @@ def NeuralNetLearner(dataset, hidden_layer_sizes=None, learning_rate=0.01, epoch
         # hypothesis
         o_nodes = learned_net[-1]
         prediction = find_max_node(o_nodes)
+
         return prediction
 
     return predict
@@ -634,7 +663,8 @@ def BackPropagationLearner(dataset, net, learning_rate, epochs, activation=sigmo
     # initialise weights
     for layer in net:
         for node in layer:
-            node.weights = random_weights(min_value=-0.5, max_value=0.5, num_weights=len(node.weights))
+            node.weights = random_weights(min_value=-0.5, max_value=0.5,
+                                          num_weights=len(node.weights))
 
     examples = dataset.examples
     # As of now dataset.target gives an int instead of list,
@@ -684,12 +714,14 @@ def BackPropagationLearner(dataset, net, learning_rate, epochs, activation=sigmo
             elif node.activation == elu:
                 delta[-1] = [elu_derivative(o_nodes[i].value) * err[i] for i in range(o_units)]
             elif node.activation == leaky_relu:
-                delta[-1] = [leaky_relu_derivative(o_nodes[i].value) * err[i] for i in range(o_units)]
+                delta[-1] = [leaky_relu_derivative(o_nodes[i].value) * err[i]
+                             for i in range(o_units)]
             else:
                 return ValueError("Activation function unknown.")
 
             # backward pass
             h_layers = n_layers - 2
+
             for i in range(h_layers, 0, -1):
                 layer = net[i]
                 h_units = len(layer)
@@ -721,6 +753,7 @@ def BackPropagationLearner(dataset, net, learning_rate, epochs, activation=sigmo
                 layer = net[i]
                 inc = [node.value for node in net[i - 1]]
                 units = len(layer)
+
                 for j in range(units):
                     layer[j].weights = vector_add(layer[j].weights,
                                                   scalar_vector_product(learning_rate * delta[i][j], inc))
@@ -836,7 +869,9 @@ class SVC:
         for n in range(len(self.alphas)):
             self.b += self.sv_y[n]
             self.b -= np.sum(self.alphas * self.sv_y * self.K[self.sv_idx[n], sv])
+
         self.b /= len(self.alphas)
+
         return self
 
     def solve_qp(self, X, y):
@@ -863,6 +898,7 @@ class SVC:
         """
         if self.w is None:
             return np.dot(self.alphas * self.sv_y, self.kernel(self.sv, X)) + self.b
+
         return np.dot(X, self.w) + self.b
 
     def predict(self, X):
@@ -904,6 +940,7 @@ class SVR:
         for n in range(len(self.alphas_p)):
             self.b += sv_y[n]
             self.b -= np.sum((self.alphas_p - self.alphas_n) * self.K[self.sv_idx[n], sv])
+
         self.b -= self.epsilon
         self.b /= len(self.alphas_p)
 
@@ -934,6 +971,7 @@ class SVR:
     def predict(self, X):
         if self.kernel != linear_kernel:
             return np.dot(self.alphas_p - self.alphas_n, self.kernel(self.sv, X)) + self.b
+
         return np.dot(X, self.w) + self.b
 
 
@@ -954,6 +992,7 @@ class MultiClassLearner:
         """
         labels = np.unique(y)
         self.n_class = len(labels)
+
         if self.decision_function == 'ovr':  # one-vs-rest method
             for label in labels:
                 y1 = np.array(y)
@@ -963,6 +1002,7 @@ class MultiClassLearner:
                 self.classifiers.append(copy.deepcopy(self.clf))
         elif self.decision_function == 'ovo':  # use one-vs-one method
             n_labels = len(labels)
+
             for i in range(n_labels):
                 for j in range(i + 1, n_labels):
                     neg_id, pos_id = y == labels[i], y == labels[j]
@@ -980,23 +1020,30 @@ class MultiClassLearner:
         Predicts the class of a given example according to the training method.
         """
         n_samples = len(X)
+
         if self.decision_function == 'ovr':  # one-vs-rest method
             assert len(self.classifiers) == self.n_class
+
             score = np.zeros((n_samples, self.n_class))
+
             for i in range(self.n_class):
                 clf = self.classifiers[i]
                 score[:, i] = clf.predict_score(X)
+
             return np.argmax(score, axis=1)
         elif self.decision_function == 'ovo':  # use one-vs-one method
             assert len(self.classifiers) == self.n_class * (self.n_class - 1) / 2
+
             vote = np.zeros((n_samples, self.n_class))
             clf_id = 0
+
             for i in range(self.n_class):
                 for j in range(i + 1, self.n_class):
                     res = self.classifiers[clf_id].predict(X)
                     vote[res < 0, i] += 1.0  # negative sample: class i
                     vote[res > 0, j] += 1.0  # positive sample: class j
                     clf_id += 1
+
             return np.argmax(vote, axis=1)
         else:
             return ValueError("Decision function must be either 'ovr' or 'ovo'.")
@@ -1024,17 +1071,23 @@ def ada_boost(dataset, L, K):
     eps = 1 / (2 * n)
     w = [1 / n] * n
     h, z = [], []
+
     for k in range(K):
         h_k = L(dataset, w)
         h.append(h_k)
-        error = sum(weight for example, weight in zip(examples, w) if example[target] != h_k(example))
+        error = sum(weight for example, weight in zip(
+            examples, w) if example[target] != h_k(example))
+
         # avoid divide-by-0 from either 0% or 100% error rates
         error = np.clip(error, eps, 1 - eps)
+
         for j, example in enumerate(examples):
             if example[target] == h_k(example):
                 w[j] *= error / (1 - error)
+
         w = normalize(w)
         z.append(np.log((1 - error) / error))
+
     return weighted_majority(h, z)
 
 
@@ -1054,8 +1107,10 @@ def weighted_mode(values, weights):
     'b'
     """
     totals = defaultdict(int)
+
     for v, w in zip(values, weights):
         totals[v] += w
+
     return max(totals, key=totals.__getitem__)
 
 
@@ -1065,15 +1120,18 @@ def RandomForest(dataset, n=5):
     def data_bagging(dataset, m=0):
         """Sample m examples with replacement"""
         n = len(dataset.examples)
+
         return weighted_sample_with_replacement(m or n, dataset.examples, [1] * n)
 
     def feature_bagging(dataset, p=0.7):
         """Feature bagging with probability p to retain an attribute"""
         inputs = [i for i in dataset.inputs if probability(p)]
+
         return inputs or dataset.inputs
 
     def predict(example):
         print([predictor(example) for predictor in predictors])
+
         return mode(predictor(example) for predictor in predictors)
 
     predictors = [DecisionTreeLearner(DataSet(examples=data_bagging(dataset), attrs=dataset.attrs,
@@ -1101,6 +1159,7 @@ def replicated_dataset(dataset, weights, n=None):
     n = n or len(dataset.examples)
     result = copy.copy(dataset)
     result.examples = weighted_replicate(dataset.examples, weights, n)
+
     return result
 
 
@@ -1116,8 +1175,9 @@ def weighted_replicate(seq, weights, n):
     weights = normalize(weights)
     wholes = [int(w * n) for w in weights]
     fractions = [(w * n) % 1 for w in weights]
-    return (flatten([x] * nx for x, nx in zip(seq, wholes)) +
-            weighted_sample_with_replacement(n - sum(wholes), seq, fractions))
+
+    return (flatten([x] * nx for x, nx in zip(seq, wholes))
+            + weighted_sample_with_replacement(n - sum(wholes), seq, fractions))
 
 
 # metrics
@@ -1129,19 +1189,21 @@ def accuracy_score(y_pred, y_true):
 
 def r2_score(y_pred, y_true):
     assert y_pred.shape == y_true.shape
-    return 1. - (np.sum(np.square(y_pred - y_true)) /  # sum of square of residuals
-                 np.sum(np.square(y_true - np.mean(y_true))))  # total sum of squares
+    return 1. - (np.sum(np.square(y_pred - y_true))  # sum of square of residuals
+                 / np.sum(np.square(y_true - np.mean(y_true))))  # total sum of squares
 
 
 # datasets
 
-orings = DataSet(name='orings', target='Distressed', attr_names='Rings Distressed Temp Pressure Flightnum')
+orings = DataSet(name='orings', target='Distressed',
+                 attr_names='Rings Distressed Temp Pressure Flightnum')
 
 zoo = DataSet(name='zoo', target='type', exclude=['name'],
               attr_names='name hair feathers eggs milk airborne aquatic predator toothed backbone '
                          'breathes venomous fins legs tail domestic catsize type')
 
-iris = DataSet(name='iris', target='class', attr_names='sepal-len sepal-width petal-len petal-width class')
+iris = DataSet(name='iris', target='class',
+               attr_names='sepal-len sepal-width petal-len petal-width class')
 
 
 def RestaurantDataSet(examples=None):
@@ -1159,6 +1221,7 @@ restaurant = RestaurantDataSet()
 def T(attr_name, branches):
     branches = {value: (child if isinstance(child, DecisionFork) else DecisionLeaf(child))
                 for value, child in branches.items()}
+
     return DecisionFork(restaurant.attr_num(attr_name), attr_name, print, branches)
 
 
@@ -1192,6 +1255,7 @@ def SyntheticRestaurant(n=20):
     def gen():
         example = list(map(random.choice, restaurant.values))
         example[restaurant.target] = waiting_decision_tree(example)
+
         return example
 
     return RestaurantDataSet([gen() for _ in range(n)])
@@ -1203,10 +1267,12 @@ def Majority(k, n):
     k random bits followed by a 1 if more than half the bits are 1, else 0.
     """
     examples = []
+
     for i in range(n):
         bits = [random.choice([0, 1]) for _ in range(k)]
         bits.append(int(sum(bits) > k / 2))
         examples.append(bits)
+
     return DataSet(name='majority', examples=examples)
 
 
@@ -1216,10 +1282,12 @@ def Parity(k, n, name='parity'):
     k random bits followed by a 1 if an odd number of bits are 1, else 0.
     """
     examples = []
+
     for i in range(n):
         bits = [random.choice([0, 1]) for _ in range(k)]
         bits.append(sum(bits) % 2)
         examples.append(bits)
+
     return DataSet(name=name, examples=examples)
 
 
@@ -1231,9 +1299,11 @@ def Xor(n):
 def ContinuousXor(n):
     """2 inputs are chosen uniformly from (0.0 .. 2.0]; output is xor of ints."""
     examples = []
+
     for i in range(n):
         x, y = [random.uniform(0.0, 2.0) for _ in '12']
         examples.append([x, y, x != y])
+
     return DataSet(name='continuous xor', examples=examples)
 
 
@@ -1243,7 +1313,8 @@ def compare(algorithms=None, datasets=None, k=10, trials=1):
     Print results as a table.
     """
     # default list of algorithms
-    algorithms = algorithms or [PluralityLearner, NaiveBayesLearner, NearestNeighborLearner, DecisionTreeLearner]
+    algorithms = algorithms or [PluralityLearner, NaiveBayesLearner,
+                                NearestNeighborLearner, DecisionTreeLearner]
 
     # default list of datasets
     datasets = datasets or [iris, orings, zoo, restaurant, SyntheticRestaurant(20),

@@ -126,7 +126,7 @@ Cuadernos listos:
 * agents.ipynb [Tested]
 * csp.ipynb [Tested]
 * games.ipynb [Tested]
-* learning.ipynb **
+* learning.ipynb [Tested]
 * learning_apps.ipynb
 * logic.ipynb [Tested]
 * mdp.ipynb [Tested]

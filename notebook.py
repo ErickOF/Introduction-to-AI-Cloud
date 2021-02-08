@@ -10,6 +10,8 @@ from IPython.display import HTML
 from IPython.display import display
 from PIL import Image
 from matplotlib import lines
+# Add 3D support
+from mpl_toolkits.mplot3d import Axes3D
 
 from games import TicTacToe, alpha_beta_player, random_player, Fig52Extended
 from learning import DataSet
