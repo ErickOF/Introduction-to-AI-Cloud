@@ -30,8 +30,13 @@ y [Peter Norvig][norvig].
 ------------------------------------------------------------------------------
 
 ### **Antes de iniciar**
-Debe asegurarse de tener instalado Git en su computadora. Si no lo tiene,
+* Debe asegurarse de tener instalado Git en su computadora. Si no lo tiene,
 puede descargarlo [aquí][git-downloader].
+* Algunos cuadernos utilizan Graphviz para mostrar algunos grafos, por lo que
+se debe instalar este Software y se puede descarga [aquí][graphviz-downloader].
+Ahora debe agregar la ruta `<carpeta-de-instalacion>\Graphviz2.38\bin` al path
+del usuario y `<carpeta-de-instalacion>\Graphviz2.38\bin\dot.exe>` al path del
+sistema para que Python pueda encontrarlo.
 
 
 ### **Instalación**
@@ -116,10 +121,11 @@ artículo comparando algunas de ellas:
 9.  [**Markov Decision Processes Applications: mdp_apps.ipynb**](./mdp_apps.ipynb)
 10. [**Learning: learning.ipynb**](./learning.ipynb)
 10. [**Learning Applications: learning_app.ipynb**](./learning_apps.ipynb)
-11. [**Reinforcement Learning: rl.ipynb**](./rl.ipynb)
+11. [**Reinforcement Learning: reinforcement_learning.ipynb**](./reinforcement_learning.ipynb)
 12. [**Statistical Language Processing Tools: text.ipynb**](./text.ipynb)
+12. [**Viterbi Algorithm: viterbi_algorithm.ipynb**](./viterbi_algorithm.ipynb)
 13. [**Natural Language Processing: nlp.ipynb**](./nlp.ipynb)
-13. [**Natural Language Processing Applications: nlp_apps.ipynb**](./nlp_apps.ipynb)
+14. [**Natural Language Processing Applications: nlp_apps.ipynb**](./nlp_apps.ipynb)
 
 <!--
 Cuadernos listos:
@@ -127,14 +133,19 @@ Cuadernos listos:
 * csp.ipynb [Tested]
 * games.ipynb [Tested]
 * learning.ipynb [Tested]
-* learning_apps.ipynb
+* learning_apps.ipynb [Tested]
 * logic.ipynb [Tested]
 * mdp.ipynb [Tested]
 * mdp_apps.ipynb [Tested]
+* nlp.ipynb [Tested]
+* nlp_apps.ipynb [Tested]
 * planning.ipynb [Tested]
 * probability.ipynb [Tested]
+* reinforcement_learning.ipynb [Tested]
 * search.ipynb [Tested]
+* text.ipynb [Tested]
 * vacuum_world.ipynb [Tested]
+* viterbi_algorithm.ipynb [Tested]
 
 Cuadernos pendientes:
 * arc_consitency_heuristics.ipynb
@@ -144,16 +155,11 @@ Cuadernos pendientes:
 * knowledge_FOIL.ipynb
 * knowledge_version_space.ipynb
 * neural_nets.ipynb
-* nlp_apps.ipynb
-* nlp.ipynb
 * planning_angelic_search.ipynb
 * planning_graphPlan.ipynb
 * planning_hierarchical_serach.ipynb
 * planning_partial_order_planner.ipynb
 * planning_total_order_planner.ipynb
-* reinforcement_learning.ipynb
-* text.ipynb
-* viterbi_algorithm.ipynb
 -->
 
 <!-- SOURCE-->
@@ -162,6 +168,7 @@ Cuadernos pendientes:
 [aima-textbook]:http://aima.cs.berkeley.edu
 [anaconda-downloader]:https://repo.anaconda.com/archive/Anaconda3-2019.10-Windows-x86_64.exe
 [git-downloader]:https://git-scm.com/downloads
+[graphviz-downloader]:https://gitlab.com/graphviz/graphviz/-/package_files/6164164/download
 [cloud-services-for-jupyter-notebook]:https://www.dataschool.io/cloud-services-for-jupyter-notebook/
 [jupyter-use-guide]:https://jupyter-notebook-beginner-guide.readthedocs.io/en/latest/execute.html
 [intro-ai-my-binder]:https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD
