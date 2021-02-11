@@ -20,20 +20,24 @@ def current_best_learning(examples, h, examples_so_far=None):
     """
     if examples_so_far is None:
         examples_so_far = []
+
     if not examples:
         return h
 
     e = examples[0]
+
     if is_consistent(e, h):
         return current_best_learning(examples[1:], h, examples_so_far + [e])
     elif false_positive(e, h):
         for h2 in specializations(examples_so_far + [e], h):
             h3 = current_best_learning(examples[1:], h2, examples_so_far + [e])
+
             if h3 != 'FAIL':
                 return h3
     elif false_negative(e, h):
         for h2 in generalizations(examples_so_far + [e], h):
             h3 = current_best_learning(examples[1:], h2, examples_so_far + [e])
+
             if h3 != 'FAIL':
                 return h3
 
@@ -54,10 +58,12 @@ def specializations(examples_so_far, h):
                 h2[k] = '!' + v
                 h3 = h.copy()
                 h3[i] = h2
+
                 if check_all_consistency(examples_so_far, h3):
                     hypotheses.append(h3)
 
     shuffle(hypotheses)
+
     return hypotheses
 
 
@@ -68,8 +74,10 @@ def generalizations(examples_so_far, h):
 
     # Delete disjunctions
     disj_powerset = power_set(range(len(h)))
+
     for disjs in disj_powerset:
         h2 = h.copy()
+
         for d in reversed(list(disjs)):
             del h2[d]
 
@@ -79,8 +87,10 @@ def generalizations(examples_so_far, h):
     # Delete AND operations in disjunctions
     for i, disj in enumerate(h):
         a_powerset = power_set(disj.keys())
+
         for attrs in a_powerset:
             h2 = h[i].copy()
+
             for a in attrs:
                 del h2[a]
 
@@ -96,6 +106,7 @@ def generalizations(examples_so_far, h):
         hypotheses.extend(add_or(examples_so_far, h))
 
     shuffle(hypotheses)
+
     return hypotheses
 
 
@@ -110,6 +121,7 @@ def add_or(examples_so_far, h):
 
     for c in a_powerset:
         h2 = {}
+
         for k in c:
             h2[k] = attrs[k]
 
@@ -131,6 +143,7 @@ def version_space_learning(examples):
     of dictionaries/disjunctions.
     """
     V = all_hypotheses(examples)
+
     for e in examples:
         if V:
             V = version_space_update(V, e)
@@ -147,6 +160,7 @@ def all_hypotheses(examples):
     values = values_table(examples)
     h_powerset = power_set(values.keys())
     hypotheses = []
+
     for s in h_powerset:
         hypotheses.extend(build_attr_combinations(s, values))
 
@@ -160,12 +174,14 @@ def values_table(examples):
     Returns a dictionary with keys the attribute names and values a list
     with the possible values for the corresponding attribute."""
     values = defaultdict(lambda: [])
+
     for e in examples:
         for k, v in e.items():
             if k == 'GOAL':
                 continue
 
             mod = '!'
+
             if e['GOAL']:
                 mod = ''
 
@@ -173,6 +189,7 @@ def values_table(examples):
                 values[k].append(mod + v)
 
     values = dict(values)
+
     return values
 
 
@@ -184,17 +201,23 @@ def build_attr_combinations(s, values):
         # s holds just one attribute, return its list of values
         k = values[s[0]]
         h = [[{s[0]: v}] for v in values[s[0]]]
+
         return h
 
     h = []
+
     for i, a in enumerate(s):
         rest = build_attr_combinations(s[i + 1:], values)
+
         for v in values[a]:
             o = {a: v}
+
             for r in rest:
                 t = o.copy()
+
                 for d in r:
                     t.update(d)
+
                 h.append([t])
 
     return h
@@ -208,8 +231,10 @@ def build_h_combinations(hypotheses):
 
     for s in h_powerset:
         t = []
+
         for i in s:
             t.extend(hypotheses[i])
+
         h.append(t)
 
     return h
@@ -234,8 +259,10 @@ def consistent_det(A, E):
 
     for e in E:
         attr_values = tuple(e[attr] for attr in A)
+
         if attr_values in H and H[attr_values] != e['GOAL']:
             return False
+
         H[attr_values] = e['GOAL']
 
     return True
@@ -284,6 +311,7 @@ class FOILContainer(FolKB):
         Return value is the tuple (horn_clause, extended_positive_examples)."""
         clause = [target, []]
         extended_examples = examples
+
         while extended_examples[1]:
             l = self.choose_literal(self.new_literals(clause), extended_examples)
             clause[1].append(l)
@@ -303,10 +331,13 @@ class FOILContainer(FolKB):
         """Generate new literals based on known predicate symbols.
         Generated literal must share at least one variable with clause"""
         share_vars = variables(clause[0])
+
         for l in clause[1]:
             share_vars.update(variables(l))
+
         for pred, arity in self.pred_syms:
             new_vars = {standardize_variables(expr('x')) for _ in range(arity - 1)}
+
             for args in product(share_vars.union(new_vars), repeat=arity):
                 if any(var in share_vars for var in args):
                     # make sure we don't return an existing rule
@@ -337,24 +368,32 @@ class FOILContainer(FolKB):
         pre_neg = len(examples[1])
         post_pos = sum([list(self.extend_example(example, l)) for example in examples[0]], [])
         post_neg = sum([list(self.extend_example(example, l)) for example in examples[1]], [])
+
         if pre_pos + pre_neg == 0 or len(post_pos) + len(post_neg) == 0:
             return -1
+
         # number of positive example that are represented in extended_examples
         T = 0
+
         for example in examples[0]:
             represents = lambda d: all(d[x] == example[x] for x in example)
+
             if any(represents(l_) for l_ in post_pos):
                 T += 1
+
         value = T * (np.log2(len(post_pos) / (len(post_pos) + len(post_neg)) + 1e-12) -
                      np.log2(pre_pos / (pre_pos + pre_neg)))
+
         return value
 
     def update_examples(self, target, examples, extended_examples):
         """Add to the kb those examples what are represented in extended_examples
         List of omitted examples is returned."""
         uncovered = []
+
         for example in examples:
             represents = lambda d: all(d[x] == example[x] for x in example)
+
             if any(represents(l) for l in extended_examples):
                 self.tell(subst(example, target))
             else:

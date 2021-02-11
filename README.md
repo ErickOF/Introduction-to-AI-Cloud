@@ -109,37 +109,71 @@ artículo comparando algunas de ellas:
 
 
 ## **Índice de los algoritmos por capítulos**
-1.  [**Agents: agents.ipynb**][agents-my-binder]
-2.  [**Vacuum World: vacuum_world.ipynb**][vacuum-world-my-binder]
+1. Introduction
+2.  [**Agents: agents.ipynb**][agents-my-binder]
+    1.  [**Vacuum World: vacuum_world.ipynb**][vacuum-world-my-binder]
+
 3.  [**Search: search.ipynb**][search-my-binder]
+
 4.  [**Games: games.ipynb**][games-my-binder]
+
 5.  [**Constraint Satisfaction Problems: csp.ipynb**][csp-my-binder]
+    1.  [**Heuristics for Arc-Consistency Algorithms: arc_consitency_heuristics.ipynb**][arc-consitency-heuristics-my-binder]
+
 6.  [**Logic: logic.ipynb**][logic-my-binder]
+    1. [**Propositional Logic. Improving Boolean Satisfiability Algorithms: improving_sat_algorithms.ipynb**][improving-sat-algorithms-my-binder]
+
 7.  [**Planning: planning.ipynb**][planning-my-binder]
+    1. [**Classical Planning Approaches: classical_planning_approches.ipynb**][classical-planning-approches-my-binder]
+    2. [**Angelic Search: planning_angelic_search.ipynb**][planning-angelic-search-my-binder]
+
 8.  [**Probability: probability.ipynb**][probability-my-binder]
+
 9.  [**Markov Decision Processes: mdp.ipynb**][mdp-my-binder]
-9.  [**Markov Decision Processes Applications: mdp_apps.ipynb**][mdp-apps-my-binder]
-10. [**Learning: learning.ipynb**][learning-my-binder]
-11. [**Learning Applications: learning_app.ipynb**][learning-apps-my-binder]
-12. [**Reinforcement Learning: reinforcement_learning.ipynb**][reinforcement-learning-my-binder]
-13. [**Statistical Language Processing Tools: text.ipynb**][text-my-binder]
-14. [**Viterbi Algorithm: viterbi_algorithm.ipynb**][viterbi-algorithm-my-binder]
-15. [**Natural Language Processing: nlp.ipynb**][nlp-my-binder]
-16. [**Natural Language Processing Applications: nlp_apps.ipynb**][nlp-apps-my-binder]
+    1. [**Markov Decision Processes Applications: mdp_apps.ipynb**][mdp-apps-my-binder]
+
+10.  [**Learning: learning.ipynb**][learning-my-binder]
+    1. [**Learning Applications: learning_app.ipynb**][learning-apps-my-binder]
+
+11. [**Reinforcement Learning: reinforcement_learning.ipynb**][reinforcement-learning-my-binder]
+
+12. [**Statistical Language Processing Tools: text.ipynb**][text-my-binder]
+    1. [**Viterbi Algorithm: viterbi_algorithm.ipynb**][viterbi-algorithm-my-binder]
+
+13. [**Natural Language Processing: nlp.ipynb**][nlp-my-binder]
+    1. [**Natural Language Processing Applications: nlp_apps.ipynb**][nlp-apps-my-binder]
+
+14. Knowledge
+    1. [**Current-Best Learning: knowledge_current_best.ipynb**][knowledge-current-best-my-binder]
+    2. [**Inductive Logic Programming (FOIL): knowledge_FOIL.ipynb**][knowledge-FOIL-my-binder]
+    3. [**Version-Space Learning: knowledge_version_space.ipynb**][knowledge-version-space-my-binder]
+
+15. [**Neural Networks: neural_nets.ipynb**][neural-nets-my-binder]
+
+
 
 <!--
 Cuadernos listos:
 * agents.ipynb [Tested]
+* arc_consitency_heuristics.ipynb [Tested]
+* classical_planning_approches.ipynb
 * csp.ipynb [Tested]
 * games.ipynb [Tested]
+* improving_sat_algorithms.ipynb [Tested]
+* knowledge_current_best.ipynb [Tested]
+* knowledge_FOIL.ipynb [Tested]
+* knowledge_version_space.ipynb [Tested]
 * learning.ipynb [Tested]
 * learning_apps.ipynb [Tested]
 * logic.ipynb [Tested]
 * mdp.ipynb [Tested]
 * mdp_apps.ipynb [Tested]
+* neural_nets.ipynb [Tested]
 * nlp.ipynb [Tested]
 * nlp_apps.ipynb [Tested]
 * planning.ipynb [Tested]
+* planning_angelic_search.ipynb [Tested]
+* planning_graphPlan.ipynb **
 * probability.ipynb [Tested]
 * reinforcement_learning.ipynb [Tested]
 * search.ipynb [Tested]
@@ -148,15 +182,6 @@ Cuadernos listos:
 * viterbi_algorithm.ipynb [Tested]
 
 Cuadernos pendientes:
-* arc_consitency_heuristics.ipynb
-* classical_planning_approches.ipynb
-* improving_sat_algorithms.ipynb
-* knowledge_current_best.ipynb
-* knowledge_FOIL.ipynb
-* knowledge_version_space.ipynb
-* neural_nets.ipynb
-* planning_angelic_search.ipynb
-* planning_graphPlan.ipynb
 * planning_hierarchical_serach.ipynb
 * planning_partial_order_planner.ipynb
 * planning_total_order_planner.ipynb
@@ -164,48 +189,57 @@ Cuadernos pendientes:
 
 <!-- SOURCE-->
 <!-- Links -->
-[aima-python-repo]:https://github.com/aimacode/aima-python
-[aima-textbook]:http://aima.cs.berkeley.edu
-[anaconda-downloader]:https://repo.anaconda.com/archive/Anaconda3-2019.10-Windows-x86_64.exe
-[git-downloader]:https://git-scm.com/downloads
-[graphviz-downloader]:https://gitlab.com/graphviz/graphviz/-/package_files/6164164/download
-[cloud-services-for-jupyter-notebook]:https://www.dataschool.io/cloud-services-for-jupyter-notebook/
-[jupyter-use-guide]:https://jupyter-notebook-beginner-guide.readthedocs.io/en/latest/execute.html
-[intro-ai-my-binder]:https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD
-[my-binder]:https://mybinder.org/
-[vs-build-tools]:https://visualstudio.microsoft.com/visual-cpp-build-tools/
+[aima-python-repo]: https://github.com/aimacode/aima-python
+[aima-textbook]: http://aima.cs.berkeley.edu
+[anaconda-downloader]: https://repo.anaconda.com/archive/Anaconda3-2019.10-Windows-x86_64.exe
+[git-downloader]: https://git-scm.com/downloads
+[graphviz-downloader]: https://gitlab.com/graphviz/graphviz/-/package_files/6164164/download
+[cloud-services-for-jupyter-notebook]: https://www.dataschool.io/cloud-services-for-jupyter-notebook/
+[jupyter-use-guide]: https://jupyter-notebook-beginner-guide.readthedocs.io/en/latest/execute.html
+[intro-ai-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD
+[my-binder]: https://mybinder.org/
+[vs-build-tools]: https://visualstudio.microsoft.com/visual-cpp-build-tools/
 
 <!-- GitHub Users --->
-[chiragvartak]:https://github.com/chiragvartak
-[norvig]:https://github.com/norvig
+[chiragvartak]: https://github.com/chiragvartak
+[norvig]: https://github.com/norvig
 
 <!-- Images -->
-[build-tools-img]:src/imgs/BuildTools.PNG
-[fork-repo-img]:src/imgs/Fork.PNG
-[test-img]:src/imgs/Test.PNG
+[build-tools-img]: src/imgs/BuildTools.PNG
+[fork-repo-img]: src/imgs/Fork.PNG
+[test-img]: src/imgs/Test.PNG
 
 <!-- Files -->
-[intro-ipynb]:https://github.com/aimacode/aima-python/blob/master/intro.ipynb
-[nlp-app-ipynb]:https://github.com/aimacode/aima-python/blob/master/nlp_apps.ipynb
-[nlp-ipynb]:https://github.com/aimacode/aima-python/blob/master/nlp.ipynb
-[nlp-py]:https://github.com/aimacode/aima-python/blob/master/nlp.py
-[test-nlp-py]:https://github.com/aimacode/aima-python/blob/master/tests/test_nlp.py
+[intro-ipynb]: https://github.com/aimacode/aima-python/blob/master/intro.ipynb
+[nlp-app-ipynb]: https://github.com/aimacode/aima-python/blob/master/nlp_apps.ipynb
+[nlp-ipynb]: https://github.com/aimacode/aima-python/blob/master/nlp.ipynb
+[nlp-py]: https://github.com/aimacode/aima-python/blob/master/nlp.py
+[test-nlp-py]: https://github.com/aimacode/aima-python/blob/master/tests/test_nlp.py
 
 <!-- My Binder Files -->
-[agents-my-binder]:https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=agents.ipynb
-[csp-my-binder]:https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=csp.ipynb
-[games-my-binder]:https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=games.ipynb
-[learning-my-binder]:https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=learning.ipynb
-[learning-apps-my-binder]:https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=learning_apps.ipynb
-[logic-my-binder]:https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=logic.ipynb
-[mdp-my-binder]:https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=mdp.ipynb
-[mdp-apps-my-binder]:https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=mdp_apps.ipynb
-[nlp-my-binder]:https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=nlp.ipynb
-[nlp-apps-my-binder]:https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=nlp_apps.ipynb
-[planning-my-binder]:https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=planning.ipynb
-[probability-my-binder]:https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=probability.ipynb
-[reinforcement-learning-my-binder]:https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=reinforcement_learning.ipynb
-[search-my-binder]:https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=search.ipynb
-[text-my-binder]:https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=text.ipynb
-[vacuum-world-my-binder]:https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=vacuum_world.ipynb
-[viterbi-algorithm-my-binder]:https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=viterbi_algorithm.ipynb
+[agents-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=agents.ipynb
+[arc-consitency-heuristics-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=arc_consitency_heuristics.ipynb
+[classical-planning-approches-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=classical_planning_approches.ipynb
+[csp-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=csp.ipynb
+[games-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=games.ipynb
+[improving-sat-algorithms-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=improving_sat_algorithms.ipynb
+[knowledge-FOIL-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=knowledge_FOIL.ipynb
+[knowledge-current-best-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=knowledge_current_best.ipynb
+[knowledge-version-space-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=knowledge_version_space.ipynb
+[learning-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=learning.ipynb
+[learning-apps-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=learning_apps.ipynb
+[logic-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=logic.ipynb
+[mdp-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=mdp.ipynb
+[mdp-apps-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=mdp_apps.ipynb
+[neural-nets-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=neural_nets.ipynb
+[nlp-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=nlp.ipynb
+[nlp-apps-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=nlp_apps.ipynb
+[planning-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=planning.ipynb
+[planning-angelic-search-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=planning_angelic_search.ipynb
+[planning-graph-plan-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=planning_graphPlan.ipynb
+[probability-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=probability.ipynb
+[reinforcement-learning-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=reinforcement_learning.ipynb
+[search-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=search.ipynb
+[text-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=text.ipynb
+[vacuum-world-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=vacuum_world.ipynb
+[viterbi-algorithm-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=viterbi_algorithm.ipynb

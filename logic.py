@@ -97,6 +97,7 @@ class PropKB(KB):
         """Return True if the KB entails query, else return False."""
         for _ in self.ask_generator(query):
             return True
+
         return False
 
     def retract(self, sentence):
@@ -121,6 +122,7 @@ def KBAgentProgram(kb):
         kb.tell(make_percept_sentence(percept, t))
         action = kb.ask(make_action_query(t))
         kb.tell(make_action_sentence(action, t))
+
         return action
 
     def make_percept_sentence(percept, t):
@@ -178,6 +180,7 @@ def is_definite_clause(s):
         return True
     elif s.op == '==>':
         antecedent, consequent = s.args
+
         return is_symbol(consequent.op) and all(is_symbol(arg.op) for arg in conjuncts(antecedent))
     else:
         return False
@@ -186,10 +189,12 @@ def is_definite_clause(s):
 def parse_definite_clause(s):
     """Return the antecedents and the consequent of a definite clause."""
     assert is_definite_clause(s)
+
     if is_symbol(s.op):
         return [], s
     else:
         antecedent, consequent = s.args
+
         return conjuncts(antecedent), consequent
 
 
@@ -211,6 +216,7 @@ def tt_entails(kb, alpha):
     """
     assert not variables(alpha)
     symbols = list(prop_symbols(kb & alpha))
+
     return tt_check_all(kb, alpha, symbols, {})
 
 
@@ -220,13 +226,15 @@ def tt_check_all(kb, alpha, symbols, model):
         if pl_true(kb, model):
             result = pl_true(alpha, model)
             assert result in (True, False)
+
             return result
         else:
             return True
     else:
         P, rest = symbols[0], symbols[1:]
-        return (tt_check_all(kb, alpha, rest, extend(model, P, True)) and
-                tt_check_all(kb, alpha, rest, extend(model, P, False)))
+
+        return (tt_check_all(kb, alpha, rest, extend(model, P, True))
+                and tt_check_all(kb, alpha, rest, extend(model, P, False)))
 
 
 def prop_symbols(x):
@@ -254,8 +262,10 @@ def predicate_symbols(x):
     All symbols (even functional) with arity > 0 are considered."""
     if not isinstance(x, Expr) or not x.args:
         return set()
+
     pred_set = {(x.op, len(x.args))} if is_prop_symbol(x.op) else set()
     pred_set.update({symbol for arg in x.args for symbol in predicate_symbols(arg)})
+
     return pred_set
 
 
@@ -265,6 +275,7 @@ def tt_true(s):
     True
     """
     s = expr(s)
+
     return tt_entails(True, s)
 
 
@@ -278,48 +289,68 @@ def pl_true(exp, model={}):
     """
     if exp in (True, False):
         return exp
+
     op, args = exp.op, exp.args
+
     if is_prop_symbol(op):
         return model.get(exp)
     elif op == '~':
         p = pl_true(args[0], model)
+
         if p is None:
             return None
         else:
             return not p
     elif op == '|':
         result = False
+
         for arg in args:
             p = pl_true(arg, model)
+
             if p is True:
                 return True
+
             if p is None:
                 result = None
+
         return result
     elif op == '&':
         result = True
+
         for arg in args:
             p = pl_true(arg, model)
+
             if p is False:
                 return False
+
             if p is None:
                 result = None
+
         return result
+
     p, q = args
+
     if op == '==>':
         return pl_true(~p | q, model)
     elif op == '<==':
         return pl_true(p | ~q, model)
+
     pt = pl_true(p, model)
+
     if pt is None:
         return None
+
     qt = pl_true(q, model)
+
     if qt is None:
         return None
+
     if op == '<=>':
         return pt == qt
+
     elif op == '^':  # xor or 'not equivalent'
         return pt != qt
+
     else:
         raise ValueError('Illegal operator in logic expression' + str(exp))
 
@@ -338,20 +369,26 @@ def to_cnf(s):
     (~B & ~C)
     """
     s = expr(s)
+
     if isinstance(s, str):
         s = expr(s)
+
     s = eliminate_implications(s)  # Steps 1, 2 from p. 253
     s = move_not_inwards(s)  # Step 3
+
     return distribute_and_over_or(s)  # Step 4
 
 
 def eliminate_implications(s):
     """Change implications into equivalent form with only &, |, and ~ as logical operators."""
     s = expr(s)
+
     if not s.args or is_symbol(s.op):
         return s  # Atoms are unchanged.
+
     args = list(map(eliminate_implications, s.args))
     a, b = args[0], args[-1]
+
     if s.op == '==>':
         return b | ~a
     elif s.op == '<==':
@@ -360,9 +397,11 @@ def eliminate_implications(s):
         return (a | ~b) & (b | ~a)
     elif s.op == '^':
         assert len(args) == 2  # TODO: relax this restriction
+
         return (a & ~b) | (~a & b)
     else:
         assert s.op in ('&', '|', '~')
+
         return Expr(s.op, *args)
 
 
@@ -372,17 +411,22 @@ def move_not_inwards(s):
     (~A & ~B)
     """
     s = expr(s)
+
     if s.op == '~':
         def NOT(b):
             return move_not_inwards(~b)
 
         a = s.args[0]
+
         if a.op == '~':
             return move_not_inwards(a.args[0])  # ~~A ==> A
+
         if a.op == '&':
             return associate('|', list(map(NOT, a.args)))
+
         if a.op == '|':
             return associate('&', list(map(NOT, a.args)))
+
         return s
     elif is_symbol(s.op) or not s.args:
         return s
@@ -397,19 +441,27 @@ def distribute_and_over_or(s):
     ((A | C) & (B | C))
     """
     s = expr(s)
+
     if s.op == '|':
         s = associate('|', s.args)
+
         if s.op != '|':
             return distribute_and_over_or(s)
+
         if len(s.args) == 0:
             return False
+
         if len(s.args) == 1:
             return distribute_and_over_or(s.args[0])
+
         conj = first(arg for arg in s.args if arg.op == '&')
+
         if not conj:
             return s
+
         others = [a for a in s.args if a is not conj]
         rest = associate('|', others)
+
         return associate('&', [distribute_and_over_or(c | rest)
                                for c in conj.args])
     elif s.op == '&':
@@ -428,6 +480,7 @@ def associate(op, args):
     (A | B | C | (A & B))
     """
     args = dissociate(op, args)
+
     if len(args) == 0:
         return _op_identity[op]
     elif len(args) == 1:
@@ -455,6 +508,7 @@ def dissociate(op, args):
                 result.append(arg)
 
     collect(args)
+
     return result
 
 
@@ -490,17 +544,23 @@ def pl_resolution(kb, alpha):
     """
     clauses = kb.clauses + conjuncts(to_cnf(~alpha))
     new = set()
+
     while True:
         n = len(clauses)
         pairs = [(clauses[i], clauses[j])
                  for i in range(n) for j in range(i + 1, n)]
+
         for (ci, cj) in pairs:
             resolvents = pl_resolve(ci, cj)
+
             if False in resolvents:
                 return True
+
             new = new.union(set(resolvents))
+
         if new.issubset(set(clauses)):
             return False
+
         for c in new:
             if c not in clauses:
                 clauses.append(c)
@@ -509,10 +569,13 @@ def pl_resolution(kb, alpha):
 def pl_resolve(ci, cj):
     """Return all clauses that can be obtained by resolving clauses ci and cj."""
     clauses = []
+
     for di in disjuncts(ci):
         for dj in disjuncts(cj):
             if di == ~dj or ~di == dj:
-                clauses.append(associate('|', unique(remove_all(di, disjuncts(ci)) + remove_all(dj, disjuncts(cj)))))
+                clauses.append(associate('|', unique(remove_all(
+                    di, disjuncts(ci)) + remove_all(dj, disjuncts(cj)))))
+
     return clauses
 
 
@@ -551,16 +614,22 @@ def pl_fc_entails(kb, q):
     count = {c: len(conjuncts(c.args[0])) for c in kb.clauses if c.op == '==>'}
     inferred = defaultdict(bool)
     agenda = [s for s in kb.clauses if is_prop_symbol(s.op)]
+
     while agenda:
         p = agenda.pop()
+
         if p == q:
             return True
+
         if not inferred[p]:
             inferred[p] = True
+
             for c in kb.clauses_with_premise(p):
                 count[c] -= 1
+
                 if count[c] == 0:
                     agenda.append(c.args[1])
+
     return False
 
 
@@ -575,6 +644,7 @@ wumpus_world_inference = expr('(B11 <=> (P12 | P21))  &  ~B11')
 Propositional Logic Forward Chaining example
 """
 horn_clauses_KB = PropDefiniteKB()
+
 for clause in ['P ==> Q',
                '(L & M) ==> P',
                '(B & L) ==> M',
@@ -587,6 +657,7 @@ for clause in ['P ==> Q',
 Definite clauses KB example
 """
 definite_clauses_KB = PropDefiniteKB()
+
 for clause in ['(B & F) ==> E',
                '(A & E & F) ==> G',
                '(B & C) ==> F',
@@ -607,6 +678,7 @@ def no_branching_heuristic(symbols, clauses):
 
 def min_clauses(clauses):
     min_len = min(map(lambda c: len(c.args), clauses), default=2)
+
     return filter(lambda c: len(c.args) == (min_len if min_len > 1 else 2), clauses)
 
 
@@ -616,6 +688,7 @@ def moms(symbols, clauses):
     Returns the literal with the most occurrences in all clauses of minimum size
     """
     scores = Counter(l for c in min_clauses(clauses) for l in prop_symbols(c))
+
     return max(symbols, key=lambda symbol: scores[symbol]), True
 
 
@@ -629,6 +702,7 @@ def momsf(symbols, clauses, k=0):
     scores = Counter(l for c in min_clauses(clauses) for l in disjuncts(c))
     P = max(symbols,
             key=lambda symbol: (scores[symbol] + scores[~symbol]) * pow(2, k) + scores[symbol] * scores[~symbol])
+
     return P, True if scores[P] >= scores[~P] else False
 
 
@@ -640,6 +714,7 @@ def posit(symbols, clauses):
     """
     scores = Counter(l for c in min_clauses(clauses) for l in disjuncts(c))
     P = max(symbols, key=lambda symbol: scores[symbol] + scores[~symbol])
+
     return P, True if scores[P] >= scores[~P] else False
 
 
@@ -649,6 +724,7 @@ def zm(symbols, clauses):
     Counts the negative occurrences only of each variable x in clauses with minimum size
     """
     scores = Counter(l for c in min_clauses(clauses) for l in disjuncts(c) if l.op == '~')
+
     return max(symbols, key=lambda symbol: scores[~symbol]), True
 
 
@@ -660,6 +736,7 @@ def dlis(symbols, clauses):
     """
     scores = Counter(l for c in clauses for l in disjuncts(c))
     P = max(symbols, key=lambda symbol: scores[symbol])
+
     return P, True if scores[P] >= scores[~P] else False
 
 
@@ -673,6 +750,7 @@ def dlcs(symbols, clauses):
     """
     scores = Counter(l for c in clauses for l in disjuncts(c))
     P = max(symbols, key=lambda symbol: scores[symbol] + scores[~symbol])
+
     return P, True if scores[P] >= scores[~P] else False
 
 
@@ -683,9 +761,11 @@ def jw(symbols, clauses):
     Return the literal maximizing J
     """
     scores = Counter()
+
     for c in clauses:
         for l in prop_symbols(c):
             scores[l] += pow(2, -len(c.args))
+
     return max(symbols, key=lambda symbol: scores[symbol]), True
 
 
@@ -696,10 +776,13 @@ def jw2(symbols, clauses):
     Returns x if J(x) >= J(-x) otherwise -x
     """
     scores = Counter()
+
     for c in clauses:
         for l in disjuncts(c):
             scores[l] += pow(2, -len(c.args))
+
     P = max(symbols, key=lambda symbol: scores[symbol] + scores[~symbol])
+
     return P, True if scores[P] >= scores[~P] else False
 
 
@@ -722,23 +805,33 @@ def dpll_satisfiable(s, branching_heuristic=no_branching_heuristic):
 def dpll(clauses, symbols, model, branching_heuristic=no_branching_heuristic):
     """See if the clauses are true in a partial model."""
     unknown_clauses = []  # clauses with an unknown truth value
+
     for c in clauses:
         val = pl_true(c, model)
+
         if val is False:
             return False
+
         if val is None:
             unknown_clauses.append(c)
+
     if not unknown_clauses:
         return model
+
     P, value = find_pure_symbol(symbols, unknown_clauses)
+
     if P:
         return dpll(clauses, remove_all(P, symbols), extend(model, P, value), branching_heuristic)
+
     P, value = find_unit_clause(clauses, model)
+
     if P:
         return dpll(clauses, remove_all(P, symbols), extend(model, P, value), branching_heuristic)
+
     P, value = branching_heuristic(symbols, unknown_clauses)
-    return (dpll(clauses, remove_all(P, symbols), extend(model, P, value), branching_heuristic) or
-            dpll(clauses, remove_all(P, symbols), extend(model, P, not value), branching_heuristic))
+
+    return (dpll(clauses, remove_all(P, symbols), extend(model, P, value), branching_heuristic)
+            or dpll(clauses, remove_all(P, symbols), extend(model, P, not value), branching_heuristic))
 
 
 def find_pure_symbol(symbols, clauses):
@@ -749,13 +842,17 @@ def find_pure_symbol(symbols, clauses):
     """
     for s in symbols:
         found_pos, found_neg = False, False
+
         for c in clauses:
             if not found_pos and s in disjuncts(c):
                 found_pos = True
+
             if not found_neg and ~s in disjuncts(c):
                 found_neg = True
+
         if found_pos != found_neg:
             return s, found_pos
+
     return None, None
 
 
@@ -767,8 +864,10 @@ def find_unit_clause(clauses, model):
     """
     for clause in clauses:
         P, value = unit_clause_assign(clause, model)
+
         if P:
             return P, value
+
     return None, None
 
 
@@ -783,8 +882,10 @@ def unit_clause_assign(clause, model):
     (B, False)
     """
     P, value = None, None
+
     for literal in disjuncts(clause):
         sym, positive = inspect_literal(literal)
+
         if sym in model:
             if model[sym] == positive:
                 return None, None  # clause already True
@@ -792,6 +893,7 @@ def unit_clause_assign(clause, model):
             return None, None  # more than 1 unbound variable
         else:
             P, value = sym, positive
+
     return P, value
 
 
@@ -822,11 +924,13 @@ def luby(conflicts, restarts, queue_lbd, sum_lbd, unit=512):
     # in the state-of-art tested with unit value 1, 2, 4, 6, 8, 12, 16, 32, 64, 128, 256 and 512
     def _luby(i):
         k = 1
+
         while True:
             if i == (1 << k) - 1:
                 return 1 << (k - 1)
             elif (1 << (k - 1)) <= i < (1 << k) - 1:
                 return _luby(i - (1 << (k - 1)) + 1)
+
             k += 1
 
     return unit * _luby(restarts) == len(queue_lbd)
@@ -854,11 +958,14 @@ def cdcl_satisfiable(s, vsids_decay=0.95, restart_strategy=no_restart):
     restarts = 1
     sum_lbd = 0
     queue_lbd = []
+
     while True:
         conflict = unit_propagation(clauses, symbols, model, G, dl)
+
         if conflict:
             if dl == 0:
                 return False
+
             conflicts += 1
             dl, learn, lbd = conflict_analysis(G, dl)
             queue_lbd.append(lbd)
@@ -866,8 +973,10 @@ def cdcl_satisfiable(s, vsids_decay=0.95, restart_strategy=no_restart):
             backjump(symbols, model, G, dl)
             clauses.add(learn, model)
             scores.update(l for l in disjuncts(learn))
+
             for symbol in scores:
                 scores[symbol] *= vsids_decay
+
             if restart_strategy(conflicts, restarts, queue_lbd, sum_lbd):
                 backjump(symbols, model, G)
                 queue_lbd.clear()
@@ -875,6 +984,7 @@ def cdcl_satisfiable(s, vsids_decay=0.95, restart_strategy=no_restart):
         else:
             if not symbols:
                 return model
+
             dl += 1
             assign_decision_literal(symbols, model, scores, G, dl)
 
@@ -891,10 +1001,14 @@ def unit_propagation(clauses, symbols, model, G, dl):
     def check(c):
         if not model or clauses.get_first_watched(c) == clauses.get_second_watched(c):
             return True
+
         w1, _ = inspect_literal(clauses.get_first_watched(c))
+
         if w1 in model:
             return c in (clauses.get_neg_watched(w1) if model[w1] else clauses.get_pos_watched(w1))
+
         w2, _ = inspect_literal(clauses.get_second_watched(c))
+
         if w2 in model:
             return c in (clauses.get_neg_watched(w2) if model[w2] else clauses.get_pos_watched(w2))
 
@@ -910,11 +1024,13 @@ def unit_propagation(clauses, symbols, model, G, dl):
 
     while True:
         bcp = False
+
         for c in filter(check, clauses.get_clauses()):
             # we need only visit each clause when one of its two watched literals is assigned to 0 because, until
             # this happens, we can guarantee that there cannot be more than n-2 literals in the clause assigned to 0
             first_watched = pl_true(clauses.get_first_watched(c), model)
             second_watched = pl_true(clauses.get_second_watched(c), model)
+
             if first_watched is None and clauses.get_first_watched(c) == clauses.get_second_watched(c):
                 unit_clause(clauses.get_first_watched(c))
                 bcp = True
@@ -930,6 +1046,7 @@ def unit_propagation(clauses, symbols, model, G, dl):
                         break
                     else:  # else (it is False) the clause is a conflict clause
                         conflict_clause(c)
+
                         return True
             elif second_watched is False and first_watched is not True:
                 if clauses.update_first_watched(c, model):
@@ -942,6 +1059,7 @@ def unit_propagation(clauses, symbols, model, G, dl):
                         break
                     else:  # else (it is False) the clause is a conflict clause
                         conflict_clause(c)
+
                         return True
         if not bcp:
             return False
@@ -949,10 +1067,12 @@ def unit_propagation(clauses, symbols, model, G, dl):
 
 def conflict_analysis(G, dl):
     conflict_clause = next(G[p]['K']['antecedent'] for p in G.pred['K'])
-    P = next(node for node in G.nodes() - 'K' if G.nodes[node]['dl'] == dl and G.in_degree(node) == 0)
+    P = next(node for node in G.nodes()
+             - 'K' if G.nodes[node]['dl'] == dl and G.in_degree(node) == 0)
     first_uip = nx.immediate_dominators(G, P)['K']
     G.remove_node('K')
     conflict_side = nx.descendants(G, first_uip)
+
     while True:
         for l in prop_symbols(conflict_clause).intersection(conflict_side):
             antecedent = next(G[p][l]['antecedent'] for p in G.pred[l])
@@ -960,6 +1080,7 @@ def conflict_analysis(G, dl):
             # the literal block distance is calculated by taking the decision levels from variables of all
             # literals in the clause, and counting how many different decision levels were in this set
             lbd = [G.nodes[l]['dl'] for l in prop_symbols(conflict_clause)]
+
             if lbd.count(dl) == 1 and first_uip in prop_symbols(conflict_clause):
                 return 0 if len(lbd) == 1 else heapq.nlargest(2, lbd)[-1], conflict_clause, len(set(lbd))
 
@@ -970,14 +1091,17 @@ def pl_binary_resolution(ci, cj):
             if di == ~dj or ~di == dj:
                 return pl_binary_resolution(associate('|', remove_all(di, disjuncts(ci))),
                                             associate('|', remove_all(dj, disjuncts(cj))))
+
     return associate('|', unique(disjuncts(ci) + disjuncts(cj)))
 
 
 def backjump(symbols, model, G, dl=0):
     delete = {node for node in G.nodes() if G.nodes[node]['dl'] > dl}
     G.remove_nodes_from(delete)
+
     for node in delete:
         del model[node]
+
     symbols |= delete
 
 
@@ -986,6 +1110,7 @@ class TwoWLClauseDatabase:
     def __init__(self, clauses):
         self.__twl = {}
         self.__watch_list = defaultdict(lambda: [set(), set()])
+
         for c in clauses:
             self.add(c, None)
 
@@ -1003,15 +1128,19 @@ class TwoWLClauseDatabase:
     def get_first_watched(self, clause):
         if len(clause.args) == 2:
             return clause.args[0]
+
         if len(clause.args) > 2:
             return self.__twl[clause][0]
+
         return clause
 
     def get_second_watched(self, clause):
         if len(clause.args) == 2:
             return clause.args[-1]
+
         if len(clause.args) > 2:
             return self.__twl[clause][1]
+
         return clause
 
     def get_pos_watched(self, l):
@@ -1025,6 +1154,7 @@ class TwoWLClauseDatabase:
         w1, p1 = inspect_literal(self.get_first_watched(clause))
         w2, p2 = inspect_literal(self.get_second_watched(clause))
         self.__watch_list[w1][0].add(clause) if p1 else self.__watch_list[w1][1].add(clause)
+
         if w1 != w2:
             self.__watch_list[w2][0].add(clause) if p2 else self.__watch_list[w2][1].add(clause)
 
@@ -1033,29 +1163,37 @@ class TwoWLClauseDatabase:
         w2, p2 = inspect_literal(self.get_second_watched(clause))
         del self.__twl[clause]
         self.__watch_list[w1][0].discard(clause) if p1 else self.__watch_list[w1][1].discard(clause)
+
         if w1 != w2:
-            self.__watch_list[w2][0].discard(clause) if p2 else self.__watch_list[w2][1].discard(clause)
+            self.__watch_list[w2][0].discard(
+                clause) if p2 else self.__watch_list[w2][1].discard(clause)
 
     def update_first_watched(self, clause, model):
         # if a non-zero literal different from the other watched literal is found
-        found, new_watching = self.__find_new_watching_literal(clause, self.get_first_watched(clause), model)
+        found, new_watching = self.__find_new_watching_literal(
+            clause, self.get_first_watched(clause), model)
+
         if found:  # then it will replace the watched literal
             w, p = inspect_literal(self.get_second_watched(clause))
             self.__watch_list[w][0].remove(clause) if p else self.__watch_list[w][1].remove(clause)
             self.set_second_watched(clause, new_watching)
             w, p = inspect_literal(new_watching)
             self.__watch_list[w][0].add(clause) if p else self.__watch_list[w][1].add(clause)
+
             return True
 
     def update_second_watched(self, clause, model):
         # if a non-zero literal different from the other watched literal is found
-        found, new_watching = self.__find_new_watching_literal(clause, self.get_second_watched(clause), model)
+        found, new_watching = self.__find_new_watching_literal(
+            clause, self.get_second_watched(clause), model)
+
         if found:  # then it will replace the watched literal
             w, p = inspect_literal(self.get_first_watched(clause))
             self.__watch_list[w][0].remove(clause) if p else self.__watch_list[w][1].remove(clause)
             self.set_first_watched(clause, new_watching)
             w, p = inspect_literal(new_watching)
             self.__watch_list[w][0].add(clause) if p else self.__watch_list[w][1].add(clause)
+
             return True
 
     def __find_new_watching_literal(self, clause, other_watched, model):
@@ -1065,6 +1203,7 @@ class TwoWLClauseDatabase:
                 if l != other_watched and pl_true(l, model) is not False:
                     # then it is returned
                     return True, l
+
         return False, None
 
     def __assign_watching_literals(self, clause, model=None):
@@ -1089,13 +1228,18 @@ def WalkSAT(clauses, p=0.5, max_flips=10000):
     symbols = {sym for clause in clauses for sym in prop_symbols(clause)}
     # model is a random assignment of true/false to the symbols in clauses
     model = {s: random.choice([True, False]) for s in symbols}
+
     for i in range(max_flips):
         satisfied, unsatisfied = [], []
+
         for clause in clauses:
             (satisfied if pl_true(clause, model) else unsatisfied).append(clause)
+
         if not unsatisfied:  # if model satisfies all the clauses
             return model
+
         clause = random.choice(unsatisfied)
+
         if probability(p):
             sym = random.choice(list(prop_symbols(clause)))
         else:
@@ -1105,10 +1249,13 @@ def WalkSAT(clauses, p=0.5, max_flips=10000):
                 model[sym] = not model[sym]
                 count = len([clause for clause in clauses if pl_true(clause, model)])
                 model[sym] = not model[sym]
+
                 return count
 
             sym = max(prop_symbols(clause), key=sat_count)
+
         model[sym] = not model[sym]
+
     # If no solution is found within the flip limit, we return failure
     return None
 
@@ -1124,19 +1271,25 @@ def MapColoringSAT(colors, neighbors):
     specified as a string of the form defined by parse_neighbors."""
     if isinstance(neighbors, str):
         neighbors = parse_neighbors(neighbors)
+
     colors = UniversalDict(colors)
     clauses = []
+
     for state in neighbors.keys():
         clause = [expr(state + '_' + c) for c in colors[state]]
         clauses.append(clause)
+
         for t in itertools.combinations(clause, 2):
             clauses.append([~t[0], ~t[1]])
+
         visited = set()
         adj = set(neighbors[state]) - visited
         visited.add(state)
+
         for n_state in adj:
             for col in colors[n_state]:
                 clauses.append([expr('~' + state + '_' + col), expr('~' + n_state + '_' + col)])
+
     return associate('&', map(lambda c: associate('|', c), clauses))
 
 
@@ -1268,8 +1421,10 @@ def equiv(lhs, rhs):
 
 def new_disjunction(sentences):
     t = sentences[0]
+
     for i in range(1, len(sentences)):
         t |= sentences[i]
+
     return t
 
 
@@ -1283,6 +1438,7 @@ class WumpusKB(PropKB):
 
     def __init__(self, dimrow):
         super().__init__()
+
         self.dimrow = dimrow
         self.tell(~wumpus(1, 1))
         self.tell(~pit(1, 1))
@@ -1314,6 +1470,7 @@ class WumpusKB(PropKB):
 
         # Rule that describes existence of at least one Wumpus
         wumpus_at_least = list()
+
         for x in range(1, dimrow + 1):
             for y in range(1, dimrow + 1):
                 wumpus_at_least.append(wumpus(x, y))
@@ -1334,6 +1491,7 @@ class WumpusKB(PropKB):
             for j in range(1, dimrow + 1):
                 self.tell(implies(location(i, j, 0), equiv(percept_breeze(0), breeze(i, j))))
                 self.tell(implies(location(i, j, 0), equiv(percept_stench(0), stench(i, j))))
+
                 if i != 1 or j != 1:
                     self.tell(~location(i, j, 0))
 
@@ -1391,6 +1549,7 @@ class WumpusKB(PropKB):
     def add_temporal_sentences(self, time):
         if time == 0:
             return
+
         t = time - 1
 
         # current location rules
@@ -1399,13 +1558,18 @@ class WumpusKB(PropKB):
                 self.tell(implies(location(i, j, time), equiv(percept_breeze(time), breeze(i, j))))
                 self.tell(implies(location(i, j, time), equiv(percept_stench(time), stench(i, j))))
                 s = list()
-                s.append(equiv(location(i, j, time), location(i, j, time) & ~move_forward(time) | percept_bump(time)))
+                s.append(equiv(location(i, j, time), location(i, j, time)
+                               & ~move_forward(time) | percept_bump(time)))
+
                 if i != 1:
                     s.append(location(i - 1, j, t) & facing_east(t) & move_forward(t))
+
                 if i != self.dimrow:
                     s.append(location(i + 1, j, t) & facing_west(t) & move_forward(t))
+
                 if j != 1:
                     s.append(location(i, j - 1, t) & facing_north(t) & move_forward(t))
+
                 if j != self.dimrow:
                     s.append(location(i, j + 1, t) & facing_south(t) & move_forward(t))
 
@@ -1413,7 +1577,8 @@ class WumpusKB(PropKB):
                 self.tell(new_disjunction(s))
 
                 # add sentence about safety of location i,j
-                self.tell(equiv(ok_to_move(i, j, time), ~pit(i, j) & ~wumpus(i, j) & wumpus_alive(time)))
+                self.tell(equiv(ok_to_move(i, j, time), ~pit(i, j)
+                                & ~wumpus(i, j) & wumpus_alive(time)))
 
         # Rules about current orientation
 
@@ -1522,6 +1687,7 @@ class HybridWumpusAgent(Agent):
             self.current_position = WumpusPosition(temp[0], temp[1], 'RIGHT')
 
         safe_points = list()
+
         for i in range(1, self.dimrow + 1):
             for j in range(1, self.dimrow + 1):
                 if self.kb.ask_if_true(ok_to_move(i, j, self.t)):
@@ -1537,12 +1703,15 @@ class HybridWumpusAgent(Agent):
 
         if len(self.plan) == 0:
             unvisited = list()
+
             for i in range(1, self.dimrow + 1):
                 for j in range(1, self.dimrow + 1):
                     for k in range(self.t):
                         if self.kb.ask_if_true(location(i, j, k)):
                             unvisited.append([i, j])
+
             unvisited_and_safe = list()
+
             for u in unvisited:
                 for s in safe_points:
                     if u not in unvisited_and_safe and s == u:
@@ -1553,6 +1722,7 @@ class HybridWumpusAgent(Agent):
 
         if len(self.plan) == 0 and self.kb.ask_if_true(have_arrow(self.t)):
             possible_wumpus = list()
+
             for i in range(1, self.dimrow + 1):
                 for j in range(1, self.dimrow + 1):
                     if not self.kb.ask_if_true(wumpus(i, j)):
@@ -1563,10 +1733,12 @@ class HybridWumpusAgent(Agent):
 
         if len(self.plan) == 0:
             not_unsafe = list()
+
             for i in range(1, self.dimrow + 1):
                 for j in range(1, self.dimrow + 1):
                     if not self.kb.ask_if_true(ok_to_move(i, j, self.t)):
                         not_unsafe.append([i, j])
+
             temp = self.plan_route(self.current_position, not_unsafe, safe_points)
             self.plan.extend(temp)
 
@@ -1586,6 +1758,7 @@ class HybridWumpusAgent(Agent):
 
     def plan_route(self, current, goals, allowed):
         problem = PlanRoute(current, goals, allowed, self.dimrow)
+
         return astar_search(problem).solution()
 
     def plan_shot(self, current, goals, allowed):
@@ -1594,18 +1767,23 @@ class HybridWumpusAgent(Agent):
         for loc in goals:
             x = loc[0]
             y = loc[1]
+
             for i in range(1, self.dimrow + 1):
                 if i < x:
                     shooting_positions.add(WumpusPosition(i, y, 'EAST'))
+
                 if i > x:
                     shooting_positions.add(WumpusPosition(i, y, 'WEST'))
+
                 if i < y:
                     shooting_positions.add(WumpusPosition(x, i, 'NORTH'))
+
                 if i > y:
                     shooting_positions.add(WumpusPosition(x, i, 'SOUTH'))
 
         # Can't have a shooting position from any of the rooms the Wumpus could reside
         orientations = ['EAST', 'WEST', 'NORTH', 'SOUTH']
+
         for loc in goals:
             for orientation in orientations:
                 shooting_positions.remove(WumpusPosition(loc[0], loc[1], orientation))
@@ -1613,6 +1791,7 @@ class HybridWumpusAgent(Agent):
         actions = list()
         actions.extend(self.plan_route(current, shooting_positions, allowed))
         actions.append('Shoot')
+
         return actions
 
 
@@ -1635,6 +1814,7 @@ def SAT_plan(init, transition, goal, t_max, SAT_solver=cdcl_satisfiable):
 
         # Symbol claiming state s at time t
         state_counter = itertools.count()
+
         for s in states:
             for t in range(time + 1):
                 state_sym[s, t] = Expr('S_{}'.format(next(state_counter)))
@@ -1649,9 +1829,11 @@ def SAT_plan(init, transition, goal, t_max, SAT_solver=cdcl_satisfiable):
 
         # All possible transitions
         transition_counter = itertools.count()
+
         for s in states:
             for action in transition[s]:
                 s_ = transition[s][action]
+
                 for t in range(time):
                     # Action 'action' taken from state 's' at time 't' to reach 's_'
                     action_sym[s, action, t] = Expr('T_{}'.format(next(transition_counter)))
@@ -1690,6 +1872,7 @@ def SAT_plan(init, transition, goal, t_max, SAT_solver=cdcl_satisfiable):
         true_transitions = [t for t in action_sym if model[action_sym[t]]]
         # Sort transitions based on time, which is the 3rd element of the tuple
         true_transitions.sort(key=lambda x: x[2])
+
         return [action for s, action, time in true_transitions]
 
     # Body of SAT_plan algorithm
@@ -1700,8 +1883,10 @@ def SAT_plan(init, transition, goal, t_max, SAT_solver=cdcl_satisfiable):
 
         cnf = translate_to_SAT(init, transition, goal, t)
         model = SAT_solver(cnf)
+
         if model is not False:
             return extract_solution(model)
+
     return None
 
 
@@ -1732,6 +1917,7 @@ def unify(x, y, s={}):
     elif issequence(x) and issequence(y) and len(x) == len(y):
         if not x:
             return s
+
         return unify(x[1:], y[1:], unify(x[0], y[0], s))
     else:
         return None
@@ -1752,6 +1938,7 @@ def unify_var(var, x, s):
     else:
         new_s = extend(s, var, x)
         cascade_substitution(new_s)
+
         return new_s
 
 
@@ -1763,8 +1950,8 @@ def occur_check(var, x, s):
     elif is_variable(x) and x in s:
         return occur_check(var, s[x], s)
     elif isinstance(x, Expr):
-        return (occur_check(var, x.op, s) or
-                occur_check(var, x.args, s))
+        return (occur_check(var, x.op, s)
+                or occur_check(var, x.args, s))
     elif isinstance(x, (list, tuple)):
         return first(e for e in x if occur_check(var, e, s))
     else:
@@ -1802,6 +1989,7 @@ def cascade_substitution(s):
 
     for x in s:
         s[x] = subst(s, s.get(x))
+
         if isinstance(s.get(x), Expr) and not is_variable(s.get(x)):
             # Ensure Function Terms are correct updates by passing over them again
             s[x] = subst(s, s.get(x))
@@ -1818,8 +2006,10 @@ def unify_mm(x, y, s={}):
 
     set_eq = extend(s, x, y)
     s = set_eq.copy()
+
     while True:
         trans = 0
+
         for x, y in set_eq.items():
             if x == y:
                 # if x = y this mapping is deleted (rule b)
@@ -1847,7 +2037,9 @@ def unify_mm(x, y, s={}):
                 # try to apply variable elimination to y (rule d)
                 if occur_check(x, y, s):
                     return None
+
                 s[x] = vars_elimination(y, s)
+
                 if y == s.get(x):
                     trans += 1
             else:
@@ -1855,6 +2047,7 @@ def unify_mm(x, y, s={}):
         if trans == len(set_eq):
             # if no transformation has been applied, stop with success
             return s
+
         set_eq = s.copy()
 
 
@@ -1876,8 +2069,10 @@ def vars_elimination(x, s):
     elimination to each term of the function."""
     if not isinstance(x, Expr):
         return x
+
     if is_variable(x):
         return s.get(x, x)
+
     return Expr(x.op, *[vars_elimination(arg, s) for arg in x.args])
 
 
@@ -1885,6 +2080,7 @@ def standardize_variables(sentence, dic=None):
     """Replace all the variables in sentence with new variables."""
     if dic is None:
         dic = {}
+
     if not isinstance(sentence, Expr):
         return sentence
     elif is_var_symbol(sentence.op):
@@ -1893,6 +2089,7 @@ def standardize_variables(sentence, dic=None):
         else:
             v = Expr('v_{}'.format(next(standardize_variables.counter)))
             dic[sentence] = v
+
             return v
     else:
         return Expr(sentence.op, *[standardize_variables(a, dic) for a in sentence.args])
@@ -1932,6 +2129,7 @@ class FolKB(KB):
     def __init__(self, clauses=None):
         super().__init__()
         self.clauses = []  # inefficient: no indexing
+
         if clauses:
             for clause in clauses:
                 self.tell(clause)
@@ -1962,6 +2160,7 @@ def fol_fc_ask(kb, alpha):
 
     def enum_subst(p):
         query_vars = list({v for clause in p for v in variables(clause)})
+
         for assignment_list in itertools.product(kb_consts, repeat=len(query_vars)):
             theta = {x: y for x, y in zip(query_vars, assignment_list)}
             yield theta
@@ -1969,25 +2168,32 @@ def fol_fc_ask(kb, alpha):
     # check if we can answer without new inferences
     for q in kb.clauses:
         phi = unify_mm(q, alpha)
+
         if phi is not None:
             yield phi
 
     while True:
         new = []
+
         for rule in kb.clauses:
             p, q = parse_definite_clause(rule)
+
             for theta in enum_subst(p):
                 if set(subst(theta, p)).issubset(set(kb.clauses)):
                     q_ = subst(theta, q)
+
                     if all([unify_mm(x, q_) is None for x in kb.clauses + new]):
                         new.append(q_)
                         phi = unify_mm(q_, alpha)
+
                         if phi is not None:
                             yield phi
         if not new:
             break
+
         for clause in new:
             kb.tell(clause)
+
     return None
 
 
@@ -2003,6 +2209,7 @@ def fol_bc_ask(kb, query):
 def fol_bc_or(kb, goal, theta):
     for rule in kb.fetch_rules_for_goal(goal):
         lhs, rhs = parse_definite_clause(standardize_variables(rule))
+
         for theta1 in fol_bc_and(kb, lhs, unify_mm(rhs, goal, theta)):
             yield theta1
 
@@ -2014,6 +2221,7 @@ def fol_bc_and(kb, goals, theta):
         yield theta
     else:
         first, rest = goals[0], goals[1:]
+
         for theta1 in fol_bc_or(kb, subst(theta, first), theta):
             for theta2 in fol_bc_and(kb, rest, theta1):
                 yield theta2
@@ -2072,6 +2280,7 @@ def diff(y, x):
         return 0
     else:
         u, op, v = y.args[0], y.op, y.args[-1]
+
         if op == '+':
             return diff(u, x) + diff(v, x)
         elif op == '-' and len(y.args) == 1:
@@ -2085,8 +2294,8 @@ def diff(y, x):
         elif op == '**' and isnumber(x.op):
             return v * u ** (v - 1) * diff(u, x)
         elif op == '**':
-            return (v * u ** (v - 1) * diff(u, x) +
-                    u ** v * Expr('log')(u) * diff(v, x))
+            return (v * u ** (v - 1) * diff(u, x)
+                    + u ** v * Expr('log')(u) * diff(v, x))
         elif op == 'log':
             return diff(u, x) / u
         else:
@@ -2097,15 +2306,20 @@ def simp(x):
     """Simplify the expression x."""
     if isnumber(x) or not x.args:
         return x
+
     args = list(map(simp, x.args))
     u, op, v = args[0], x.op, args[-1]
+
     if op == '+':
         if v == 0:
             return u
+
         if u == 0:
             return v
+
         if u == v:
             return 2 * u
+
         if u == -v or v == -u:
             return 0
     elif op == '-' and len(args) == 1:
@@ -2114,37 +2328,49 @@ def simp(x):
     elif op == '-':
         if v == 0:
             return u
+
         if u == 0:
             return -v
+
         if u == v:
             return 0
+
         if u == -v or v == -u:
             return 0
     elif op == '*':
         if u == 0 or v == 0:
             return 0
+
         if u == 1:
             return v
+
         if v == 1:
             return u
+
         if u == v:
             return u ** 2
     elif op == '/':
         if u == 0:
             return 0
+
         if v == 0:
             return Expr('Undefined')
+
         if u == v:
             return 1
+
         if u == -v or v == -u:
             return 0
     elif op == '**':
         if u == 0:
             return 0
+
         if v == 0:
             return 1
+
         if u == 1:
             return 1
+
         if v == 1:
             return u
     elif op == 'log':
@@ -2152,6 +2378,7 @@ def simp(x):
             return 0
     else:
         raise ValueError('Unknown op: ' + op)
+
     # If we fall through to here, we can not simplify further
     return Expr(op, *args)
 
