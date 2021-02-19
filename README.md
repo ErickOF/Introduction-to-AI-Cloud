@@ -126,6 +126,9 @@ artículo comparando algunas de ellas:
 7.  [**Planning: planning.ipynb**][planning-my-binder]
     1. [**Classical Planning Approaches: classical_planning_approches.ipynb**][classical-planning-approches-my-binder]
     2. [**Angelic Search: planning_angelic_search.ipynb**][planning-angelic-search-my-binder]
+    3. [**Graph Plan: planning_graphPlan.ipynb**][planning-graph-plan-my-binder]
+    4. [**Hierarchical Search: planning_hierarchical_search.ipynb**][planning-hierarchical-search-my-binder]
+    5. [**Total Order Planner: planning_total_order_planner.ipynb**][planning-total-order-planner-my-binder]
 
 8.  [**Probability: probability.ipynb**][probability-my-binder]
 
@@ -173,7 +176,10 @@ Cuadernos listos:
 * nlp_apps.ipynb [Tested]
 * planning.ipynb [Tested]
 * planning_angelic_search.ipynb [Tested]
-* planning_graphPlan.ipynb **
+* planning_graphPlan.ipynb [Tested]
+* planning_hierarchical_search.ipynb [Tested]
+* planning_partial_order_planner.ipynb [Tested]
+* planning_total_order_planner.ipynb [Tested]
 * probability.ipynb [Tested]
 * reinforcement_learning.ipynb [Tested]
 * search.ipynb [Tested]
@@ -181,11 +187,6 @@ Cuadernos listos:
 * vacuum_world.ipynb [Tested]
 * viterbi_algorithm.ipynb [Tested]
 
-Cuadernos pendientes:
-* planning_hierarchical_serach.ipynb
-* planning_partial_order_planner.ipynb
-* planning_total_order_planner.ipynb
--->
 
 <!-- SOURCE-->
 <!-- Links -->
@@ -236,7 +237,9 @@ Cuadernos pendientes:
 [nlp-apps-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=nlp_apps.ipynb
 [planning-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=planning.ipynb
 [planning-angelic-search-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=planning_angelic_search.ipynb
+[planning-hierarchical-search-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=planning_hierarchical_search.ipynb
 [planning-graph-plan-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=planning_graphPlan.ipynb
+[planning-total-order-planner-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=planning_total_order_planner.ipynb
 [probability-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=probability.ipynb
 [reinforcement-learning-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=reinforcement_learning.ipynb
 [search-my-binder]: https://mybinder.org/v2/gh/ErickOF/Introduction-to-AI-Cloud/HEAD?filepath=search.ipynb
