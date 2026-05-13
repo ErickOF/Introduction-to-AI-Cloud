@@ -1005,39 +1005,50 @@ class WumpusEnvironment(XYEnvironment):
                   .format("with Gold [+1000]!" if Gold() not in self.things else "without Gold [+0]"))
         return True
 
-    # TODO: Arrow needs to be implemented
+
+# TODO: Arrow needs to be implemented
 
 
 # ______________________________________________________________________________
 
 
 def compare_agents(EnvFactory, AgentFactories, n=10, steps=1000):
-    """See how well each of several agents do in n instances of an environment.
-    Pass in a factory (constructor) for environments, and several for agents.
-    Create n instances of the environment, and run each agent in copies of
-    each one for steps. Return a list of (agent, average-score) tuples.
-    >>> environment = TrivialVacuumEnvironment
-    >>> agents = [ModelBasedVacuumAgent, ReflexVacuumAgent]
-    >>> result = compare_agents(environment, agents)
-    >>> performance_ModelBasedVacuumAgent = result[0][1]
-    >>> performance_ReflexVacuumAgent = result[1][1]
-    >>> performance_ReflexVacuumAgent <= performance_ModelBasedVacuumAgent
-    True
     """
-    envs = [EnvFactory() for i in range(n)]
-    return [(A, test_agent(A, steps, copy.deepcopy(envs)))
-            for A in AgentFactories]
+    Compare the performance of multiple agents across several environments.
+
+    Parameters:
+    ----------
+    EnvFactory : function/class
+        Factory used to create environment instances.
+
+    AgentFactories : list
+        List of agent constructors/classes to evaluate.
+
+    n : int, optional
+        Number of environments to generate (default = 10).
+
+    steps : int, optional
+        Number of steps each agent will run (default = 1000).
+
+    Returns:
+    -------
+    list
+        List of tuples containing:
+        (AgentClass, AveragePerformanceScore)
+    """
+
+    envs = [EnvFactory() for _ in range(n)]
+
+    return [
+        (A, test_agent(A, steps, copy.deepcopy(envs)))
+        for A in AgentFactories
+    ]
 
 
 def test_agent(AgentFactory, steps, envs):
-    """Return the mean score of running an agent in each of the envs, for steps
-    >>> def constant_prog(percept):
-    ...     return percept
-    ...
-    >>> agent = Agent(constant_prog)
-    >>> result = agent.program(5)
-    >>> result == 5
-    True
+    """
+    Evaluate a single agent across multiple environments
+    and return its average performance score.
     """
 
     def score(env):
@@ -1047,8 +1058,6 @@ def test_agent(AgentFactory, steps, envs):
         return agent.performance
 
     return mean(map(score, envs))
-
-
 # _________________________________________________________________________
 
 
